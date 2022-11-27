@@ -14,6 +14,7 @@ require('dotenv').config()
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
 let db: Db
+let customers: Collection
 
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
@@ -82,9 +83,7 @@ app.post(
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("test")
-  // operators = db.collection('operators')
-  // orders = db.collection('orders')
-  // customers = db.collection('customers')
+  customers = db.collection('customers')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/dbay/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -101,22 +100,16 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        // const operator = await operators.findOne({ _id })
-        // if (operator != null) {
-        //   userInfo.roles = ["operator"]
-        // } else {
-        //   await customers.updateOne(
-        //     { _id },
-        //     {
-        //       $set: {
-        //         name: userInfo.name
-        //       }
-        //     },
-        //     { upsert: true }
-        //   )
-        //   userInfo.roles = ["customer"]
-        // }
-
+        const customer = await customers.findOne({ _id })
+        if (customer == null) {
+          await customers.insertOne(
+            {
+              _id,
+              name: userInfo.name,
+              email: userInfo.email
+            }
+          )
+        }
         return done(null, userInfo)
       }
     ))

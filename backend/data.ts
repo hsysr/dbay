@@ -1,9 +1,8 @@
 interface DbayUser {
 	userName: string,
-  firstName: string,
-  lastName: string,
-	email: string,
-	phone: string,
+  name: string,
+	email: string | undefined,
+	phone: string | undefined,
 	address: string
 }
 
