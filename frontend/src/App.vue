@@ -14,19 +14,56 @@
           <form method="POST" action="/api/logout" id="logoutForm" />
         </b-navbar-nav>
       </b-navbar> -->
+
+      <!-- https://bulma.io/documentation/components/navbar/ -->
+      <nav class="navbar" role="navigation" aria-lable="main navigation">
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <strong>DBay</strong>
+          </a>
+          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-base">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div id="navbar-base" class="navbar-menu">
+          <div class="navbar-start">
+            <a class="navbar-item" href="/">
+              Home
+            </a>
+
+            <a class="navbar-item" href="/search">
+              Search
+            </a>
+          </div>
+        </div>
+
+        <div class="navbar-end">
+          <div class="navbar-item">
+            <div class="buttons">
+              <a class="button is-primary" href="/api/login">
+                <strong>Login</strong>
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
       <router-view />
     </div>
   </template>
   
-  <template>
+  <!-- <template>
     <div>
       <a href="/api/login">login</a>
-      <!-- <a href="/api/register">register</a> -->
       <span v-if="user?.name">Logged in</span>
     </div>
-  </template>
+  </template> -->
   <script setup lang="ts">
   import { onMounted, ref, provide } from 'vue'
+
   
   const user = ref({} as any)
   provide("user", user)
