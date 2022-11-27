@@ -8,13 +8,14 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
+import { getUser } from "./data"
 
 require('dotenv').config()
 
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
 let db: Db
-let customers: Collection
+export let customers: Collection
 
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
@@ -65,6 +66,15 @@ function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
 
 app.get("/api/user", (req, res) => {
   res.json(req.user || {})
+})
+
+app.get("/api/users/:username/profile", async (req, res) => {
+  const customer = await getUser(req.params.username)
+  let status = 200
+  if (customer == undefined) {
+    status = 400
+  }
+  res.status(status).json(customer)
 })
 
 app.post(

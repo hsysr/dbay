@@ -1,3 +1,5 @@
+import { customers } from './server'
+
 interface DbayUser {
 	userName: string,
   name: string,
@@ -14,3 +16,9 @@ interface DbayItem {
 	price: number,
 	description: string
 }
+
+export async function getUser(userName:string): Promise<undefined | DbayUser> {
+  const customer = await customers.findOne({ _id: userName })
+  if (customer == null) {return undefined}
+  return {userName, name: customer.name, email: customer.email, phone: customer.phone, address: customer.address}
+} 
