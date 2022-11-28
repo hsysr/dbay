@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import App from '@/App.vue'
 import Home from '@/views/Home.vue'
+import ItemDetail from '@/views/ItemDetail.vue'
 
 import 'bulma/css/bulma.css'
 
@@ -15,6 +16,15 @@ const router = new VueRouter({
     {
       path: '/',
       component: Home
+    },
+    {
+      path: '/items/:itemId/details',
+      component: ItemDetail,
+      props(route) {
+        return {
+          itemId: route.params.itemId
+        }
+      }
     }
   ]
 

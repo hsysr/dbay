@@ -29,7 +29,7 @@
     <div class="card-footer">
       <!-- TODO: link to actual pages -->
       <a href="#" class="card-footer-item">Check Seller Info</a>
-      <a href="#" class="card-footer-item">View Item Details</a>
+      <a :href="'/items/' + props.dbayItem._id + '/details'" class="card-footer-item">View Item Details</a>
     </div>
   </div>
 </template>
