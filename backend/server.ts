@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser } from "./data"
+import { getUser, createItem } from "./data"
 
 require('dotenv').config()
 
@@ -69,13 +69,48 @@ app.get("/api/user", (req, res) => {
   res.json(req.user || {})
 })
 
-app.get("/api/users/:username/profile", async (req, res) => {
+app.get("/api/users/:username/profile", checkAuthenticated, async (req, res) => {
   const customer = await getUser(req.params.username)
   let status = 200
   if (customer == undefined) {
     status = 400
   }
   res.status(status).json(customer)
+})
+
+app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
+
+  //Check payload content
+  if (typeof req.body.dbayItem.itemName === "string" &&
+      typeof req.body.dbayItem.createdBy === "string" &&
+      typeof req.body.dbayItem.price === "number" &&
+      typeof req.body.dbayItem.description === "string") {
+
+    //Check price
+    if (req.body.dbayItem.price <= 0) {
+      res.status(400).json({ status: "Item price must be positive" })
+      return
+    }
+
+    //Add item to mongo
+    let result = await createItem(
+      {
+        itemName: req.body.dbayItem.itemName,
+        createdBy: req.body.dbayItem.createdBy,
+        price: req.body.dbayItem.price,
+        description: req.body.dbayItem.description
+      }
+    )
+
+    if (result == "Dbay user does not exist") {
+      res.status(400).json({ status: "Dbay user does not exist" })
+      return
+    } 
+    
+    res.status(200).json( { status: 'ok', itemId: result } )
+    return
+  }
+  res.status(400).json({ status: "Payload type error" })
 })
 
 app.post(
