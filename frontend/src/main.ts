@@ -5,6 +5,7 @@ import Home from '@/views/Home.vue'
 import ItemDetail from '@/views/ItemDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
 import CreateItem from '@/views/CreateItem.vue'
+import UpdateUserProfile from '@/views/UpdateUserProfile.vue'
 
 import 'bulma/css/bulma.css'
 
@@ -40,6 +41,15 @@ const router = new VueRouter({
     {
       path: '/items/create-item',
       component: CreateItem
+    },
+    {
+      path: '/users/:username/profile/update',
+      component: UpdateUserProfile,
+      props(route) {
+        return {
+          username: route.params.username
+        }
+      }
     }
   ]
 

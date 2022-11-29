@@ -4,7 +4,7 @@
       <div class="hero-body">
         <p class="title has-text-centered">
           <!-- TODO: fill username -->
-          {{ dbayUser?.username }}
+          {{ dbayUser?.firstName }} {{ dbayUser?.lastName }} ({{ dbayUser?.username }})
         </p>
       </div>
     </section>
