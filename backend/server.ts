@@ -16,6 +16,7 @@ const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
 let db: Db
 export let customers: Collection
+export let items: Collection
 
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
@@ -94,6 +95,7 @@ client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("test")
   customers = db.collection('customers')
+  items = db.collection('items')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/dbay/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
