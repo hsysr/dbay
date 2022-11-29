@@ -32,7 +32,7 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button is-primary" @click.prevent="">Submit</button>
+          <button class="button is-primary" @click.prevent="submitForm">Submit</button>
         </div>
       </div>
 
@@ -53,7 +53,6 @@ library.add(faDollarSign)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 interface Payload {
-  username: string,
   dbayItem: Omit<DbayItem, '_id' | 'imageLink'>
 }
 
@@ -71,7 +70,6 @@ inject('user', currentUser)
 
 async function submitForm() {
   let payload: Payload = {
-    username: currentUser.preferred_username,
     dbayItem: {
       itemName: itemName.value,
       createdBy: currentUser.preferred_username,
