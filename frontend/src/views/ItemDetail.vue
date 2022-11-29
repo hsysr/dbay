@@ -15,7 +15,6 @@
       <p class="has-text-left is-size-3">Price: ${{ dbayItem.price }}</p>
 
     </article>
-
     <article class="message is-link">
       <div class="message-header">
         <p>Images:</p>

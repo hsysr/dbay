@@ -3,6 +3,8 @@ import VueRouter from "vue-router";
 import App from '@/App.vue'
 import Home from '@/views/Home.vue'
 import ItemDetail from '@/views/ItemDetail.vue'
+import UserProfile from '@/views/UserProfile.vue'
+import CreateItem from '@/views/CreateItem.vue'
 
 import 'bulma/css/bulma.css'
 
@@ -25,6 +27,19 @@ const router = new VueRouter({
           itemId: route.params.itemId
         }
       }
+    },
+    {
+      path: '/users/:username/profile',
+      component: UserProfile,
+      props(route) {
+        return {
+          username: route.params.username
+        }
+      }
+    },
+    {
+      path: '/items/create-item',
+      component: CreateItem
     }
   ]
 

@@ -1,20 +1,5 @@
 <template>
     <div>
-      <!-- <b-navbar toggleable="lg" type="dark" :variant="user?.roles?.includes('operator') ? 'info' : 'primary'">
-        <b-navbar-brand href="#">
-          <span v-if="user?.name">Welcome, {{ user.name }}</span>
-          <span v-else>Smoothie Stand</span>
-        </b-navbar-brand>
-        <b-navbar-nav>
-          <b-nav-item href="/">All Orders</b-nav-item>
-          <b-nav-item v-if="user?.roles?.includes('customer')" href="/customer">My Orders</b-nav-item>
-          <b-nav-item v-if="user?.roles?.includes('operator')" href="/operator">My Work Screen</b-nav-item>
-          <b-nav-item v-if="user?.name == null" href="/api/login">Login</b-nav-item>
-          <b-nav-item v-if="user?.name" @click="logout">Logout</b-nav-item>
-          <form method="POST" action="/api/logout" id="logoutForm" />
-        </b-navbar-nav>
-      </b-navbar> -->
-
       <!-- https://bulma.io/documentation/components/navbar/ -->
       <nav class="navbar" role="navigation" aria-lable="main navigation">
         <div class="navbar-brand">
@@ -33,7 +18,6 @@
             <a class="navbar-item" href="/">
               Home
             </a>
-
             <a class="navbar-item" href="/search">
               Search
             </a>
@@ -43,8 +27,11 @@
         <div class="navbar-end">
           <div class="navbar-item">
             <div class="buttons">
-              <a class="button is-primary" href="/api/login">
+              <a v-if="!(user?.name)" class="button is-primary" href="/api/login">
                 <strong>Login</strong>
+              </a>
+              <a v-else class="button is-primary" :href="`/users/${user.preferred_username}/profile`">
+                <strong>Profile</strong>
               </a>
             </div>
           </div>
@@ -55,12 +42,6 @@
     </div>
   </template>
   
-  <!-- <template>
-    <div>
-      <a href="/api/login">login</a>
-      <span v-if="user?.name">Logged in</span>
-    </div>
-  </template> -->
   <script setup lang="ts">
   import { onMounted, ref, provide } from 'vue'
 
@@ -70,6 +51,9 @@
   
   onMounted(async () => {
     user.value = await (await fetch("/api/user")).json()
+    console.log('user info:')
+    console.log(user.value)
+    console.log(user.value.name)
   })
   
   function logout() {
