@@ -32,7 +32,13 @@ export async function createItem(dbayItem: Omit<DbayItem, '_id' | 'imageLink'>) 
 	return result.insertedId.toString()
 }
 
-export async function getItem(itemId: string): Promise<undefined | DbayItem> {
+export async function getItem(itemId: string): Promise<DbayItem> {
+  try {
+    const id = new ObjectId(itemId)
+  }
+  catch {
+    return undefined
+  }
   const item = await items.findOne({ _id: new ObjectId(itemId) })
   if (item == null) {return undefined}
   return { _id: item._id.toString(), itemName: item.itemName, createdBy: item.createdBy, imageLink: item.imageLink, price: item.price, description: item.description,
@@ -40,11 +46,23 @@ export async function getItem(itemId: string): Promise<undefined | DbayItem> {
 }
 
 export async function deleteItem(itemId: string, userName: string) {
+  try {
+    const id = new ObjectId(itemId)
+  }
+  catch {
+    return 0
+  }
   const result = await items.deleteOne( { _id: new ObjectId(itemId), createdBy: userName } )
   return result.deletedCount
 }
 
 export async function updateItem(dbayItem: Omit<DbayItem, 'imageLink' | "createTime">) {
+  try {
+    const id = new ObjectId(dbayItem._id)
+  }
+  catch {
+    return 0
+  }
   const result = await items.updateOne(
     {
       _id: new ObjectId(dbayItem._id),
