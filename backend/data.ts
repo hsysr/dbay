@@ -36,3 +36,20 @@ export async function deleteItem(itemId: string, userName: string) {
   const result = await items.deleteOne( { _id: new ObjectId(itemId), createdBy: userName } )
   return result.deletedCount
 }
+
+export async function updateItem(dbayItem: Omit<DbayItem, 'imageLink' | "createTime">) {
+  const result = await items.updateOne(
+    {
+      _id: new ObjectId(dbayItem._id),
+      createdBy: dbayItem.createdBy
+    },
+    {
+      $set: {
+        itemName: dbayItem.itemName,
+        price: dbayItem.price,
+        description: dbayItem.description
+      }
+    }
+  )
+  return result.matchedCount
+}
