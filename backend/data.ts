@@ -32,6 +32,12 @@ export async function createItem(dbayItem: Omit<DbayItem, '_id' | 'imageLink'>) 
 	return result.insertedId.toString()
 }
 
+export async function getItem(itemId: string) {
+  const item = await items.findOne({ _id: new ObjectId(itemId) })
+  if (item == null) {return undefined}
+  return item
+}
+
 export async function deleteItem(itemId: string, userName: string) {
   const result = await items.deleteOne( { _id: new ObjectId(itemId), createdBy: userName } )
   return result.deletedCount
