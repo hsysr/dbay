@@ -60,3 +60,17 @@ export async function updateItem(dbayItem: Omit<DbayItem, 'imageLink' | "createT
   )
   return result.matchedCount
 }
+
+export async function addImageLink(itemId: string, filename: string) {
+  const result = await items.updateOne(
+    {
+      _id: new ObjectId(itemId)
+    },
+    {
+      $push: {
+        imageLink: "api/image/" + filename
+      }
+    }
+  )
+  return result.matchedCount
+}
