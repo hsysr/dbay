@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem } from "./data"
+import { getUser, createItem, deleteItem, updateItem } from "./data"
 
 require('dotenv').config()
 
@@ -91,6 +91,7 @@ app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
       res.status(400).json({ status: "User name does not match" })
       return
     }
+
     //Check price
     if (req.body.dbayItem.price <= 0) {
       res.status(400).json({ status: "Item price must be positive" })
@@ -115,6 +116,46 @@ app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
     
     res.status(200).json({ status: 'ok', itemId: result })
     return
+  }
+  res.status(400).json({ status: "Payload type error" })
+})
+
+app.put("/api/items/update-item", checkAuthenticated, async (req, res) => {
+  if (typeof req.body.dbayItem._id === "string" &&
+      typeof req.body.dbayItem.itemName === "string" &&
+      typeof req.body.dbayItem.createdBy === "string" &&
+      typeof req.body.dbayItem.price === "number" &&
+      typeof req.body.dbayItem.description === "string") {
+    //User cannot create other user's item
+    if (req.body.dbayItem.createdBy != (req.user as any).preferred_username) {
+      res.status(400).json({ status: "User name does not match" })
+      return
+    }
+
+    //Check price
+    if (req.body.dbayItem.price <= 0) {
+      res.status(400).json({ status: "Item price must be positive" })
+      return
+    }
+
+    const updateResult = await updateItem(
+      {
+        _id: req.body.dbayItem._id,
+        itemName: req.body.dbayItem.itemName,
+        createdBy: req.body.dbayItem.createdBy,
+        price: req.body.dbayItem.price,
+        description: req.body.dbayItem.description
+      }
+    )
+
+    if (updateResult == 0) {
+      res.status(400).json( { status: "Cannot find the user's item with given id" } )
+      return
+    }
+    else {
+      res.status(200).json({ status: 'ok' })
+      return
+    }
   }
   res.status(400).json({ status: "Payload type error" })
 })
