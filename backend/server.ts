@@ -98,7 +98,8 @@ app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
         itemName: req.body.dbayItem.itemName,
         createdBy: req.body.dbayItem.createdBy,
         price: req.body.dbayItem.price,
-        description: req.body.dbayItem.description
+        description: req.body.dbayItem.description,
+        createTime: new Date()
       }
     )
 

@@ -14,7 +14,8 @@ interface DbayItem {
   createdBy: string,
   imageLink: string[],
   price: number,
-  description: string
+  description: string,
+  createTime: Date
 }
 
 export async function getUser(userName:string): Promise<undefined | DbayUser> {
