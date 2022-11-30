@@ -85,7 +85,12 @@ app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
       typeof req.body.dbayItem.createdBy === "string" &&
       typeof req.body.dbayItem.price === "number" &&
       typeof req.body.dbayItem.description === "string") {
-
+    
+    //User cannot create other user's item
+    if (req.body.dbayItem.createdBy != (req.user as any).preferred_username) {
+      res.status(400).json({ status: "User name does not match" })
+      return
+    }
     //Check price
     if (req.body.dbayItem.price <= 0) {
       res.status(400).json({ status: "Item price must be positive" })
