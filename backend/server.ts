@@ -9,6 +9,7 @@ import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
 import { getUser, createItem, deleteItem, updateItem } from "./data"
+import fs from "fs"
 
 require('dotenv').config()
 
@@ -17,6 +18,9 @@ const client = new MongoClient(mongoUrl)
 let db: Db
 export let customers: Collection
 export let items: Collection
+
+const multer  = require('multer')
+const upload = multer({ dest: 'images/' })
 
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
@@ -168,6 +172,14 @@ app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res
   else {
     res.status(200).json({ status: 'ok' })
   }
+})
+
+app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('file'), async (req, res) => {
+  const imageType = (req as any).file.originalname.split(".").pop()
+  await new Promise((resolve, reject) => {
+    fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/a.jpg", resolve)
+  })
+  res.status(200).json({ status: "ok" })
 })
 
 app.post(
