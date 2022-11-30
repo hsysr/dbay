@@ -28,14 +28,15 @@ export async function getUser(userName:string): Promise<undefined | DbayUser> {
 export async function createItem(dbayItem: Omit<DbayItem, '_id' | 'imageLink'>) {
 	const customer = await customers.findOne({ _id: dbayItem.createdBy })
 	if (customer == null) {return "Dbay user does not exist"}
-	const result = await items.insertOne(dbayItem)
+	const result = await items.insertOne({...dbayItem, imageLink: []})
 	return result.insertedId.toString()
 }
 
-export async function getItem(itemId: string) {
+export async function getItem(itemId: string): Promise<undefined | DbayItem> {
   const item = await items.findOne({ _id: new ObjectId(itemId) })
   if (item == null) {return undefined}
-  return item
+  return { _id: item._id.toString(), itemName: item.itemName, createdBy: item.createdBy, imageLink: item.imageLink, price: item.price, description: item.description,
+  createTime: item.createTime }
 }
 
 export async function deleteItem(itemId: string, userName: string) {
