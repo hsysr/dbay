@@ -68,7 +68,7 @@ export async function addImageLink(itemId: string, filename: string) {
     },
     {
       $push: {
-        imageLink: "api/image/" + filename
+        imageLink: "api/images/" + filename
       }
     }
   )

@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink } from "./data"
 import fs from "fs"
 
 require('dotenv').config()
@@ -184,13 +184,26 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
     res.status(400).json({ status: "User name does not match" })
     return
   }
+
+
   const imageType = (req as any).file.originalname.split(".").pop()
   const newFileName = item._id + "_" + item.imageLink.length + "." + imageType
   await new Promise((resolve, reject) => {
     fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/" + newFileName, resolve)
   })
+
+  await addImageLink(item._id, newFileName)
+
   res.status(200).json({ status: "ok" })
 })
+
+app.get("/api/images/:filename", (req, res) => {
+  if (!fs.existsSync(__dirname + "/images/" + req.params.filename)) {
+    res.status(400).json({ status: "Image not found" })
+    return
+  }
+  res.status(200).sendFile(__dirname + "/images/" + req.params.filename)
+}) 
 
 app.post(
   "/api/logout", 
