@@ -48,9 +48,8 @@ interface Props {
   itemId?: string
 }
 
-interface ImageRepr {
-  id: number,
-  imgSrc: string
+interface ItemDetailsResp {
+  result: DbayItem | undefined
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -58,16 +57,15 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 async function getItemDetails() {
-  // TODO: pull data from actual server
-  // let item = await fetch()
 
-  let item = dbayItems.find(dItem => dItem._id === props.itemId)
-  if (!item) {
-    alert('Invalid item id number')
+  let item: ItemDetailsResp = await (await fetch(`/api/items/${props.itemId}/details`, { method:'GET' })).json()
+
+  // let item = dbayItems.find(dItem => dItem._id === props.itemId)
+  if (!item || !item.result) {
+    console.log(`ItemDetail->getItemDetails: Invalid item id number ${item}`)
     return
   }
-  console.log(item)
-  dbayItem.value = item
+  dbayItem.value = { ...item.result }
 }
 
 

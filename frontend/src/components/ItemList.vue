@@ -1,11 +1,14 @@
 <template>
   <div>
-    <ListItem
-      v-for="item in itemsList"
+    <div v-if="props.itemList">
+      <ListItem
+      v-for="item in props.itemList"
       :key="item._id"
       :dbayItem="item"
     >
   </ListItem>
+    </div>
+    
   </div>
 </template>
 
@@ -17,12 +20,12 @@ import ListItem from './ListItem.vue'
 let pageOffset = ref(0)
 let itemsList = ref([] as DbayItem[])
 
-async function fetchItems() {
-
-  // TODO: change this to fetch from actual backend
-  itemsList.value = dbayItems
+interface Props {
+  itemList: DbayItem[]
 }
 
-onMounted(fetchItems)
+const props = withDefaults(defineProps<Props>(), {
+  itemList: undefined
+})
 
 </script>

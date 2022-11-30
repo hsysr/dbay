@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- TODO: bind to v-model and add listeners -->
     <form>
       <div class="field">
         <label class="label">Item name</label>
@@ -59,6 +58,19 @@
         </div>
       </div>
     </form>
+    <div class="field">
+      <div class="control">
+        <button class="button is-danger">Delete Item</button>
+        <div class="message is-danger" v-if="isDeleteButtonClicked">
+          <div class="message-header">
+            Do you really wish to delete the item?
+          </div>
+          <div class="message-body">
+            <button class="button is-danger" @click="deleteItem">DELETE</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -80,7 +92,6 @@ interface Payload {
 
 interface Resp {
   status: string,
-  itemId: string
 }
 
 interface RefreshResp {
@@ -95,6 +106,10 @@ interface SubmitImageResp {
   status: string
 }
 
+interface DeleteResp {
+  status: string
+}
+
 const props = withDefaults(defineProps<Props>(), {
   itemId: ''
 })
@@ -104,6 +119,8 @@ const itemName = ref('')
 const price = ref(0)
 const description = ref('')
 const fileUploadField: Ref<HTMLInputElement | null> = ref(null)
+const date = ref(new Date())
+const isDeleteButtonClicked = ref(false)
 
 const imageName = ref('')
 let imageData: File | null = null
@@ -124,7 +141,8 @@ async function submitForm() {
       itemName: itemName.value,
       createdBy: currentUser.preferred_username,
       price: price.value,
-      description: description.value
+      description: description.value,
+      createTime: date.value
     }
   }
 
@@ -140,11 +158,10 @@ async function submitForm() {
 
   // check if success
   if (res && res.status && res.status === 'ok') {
-    // const router = new VueRouter()
-    // router.push(`/api/items/${res.itemId}/details`)
     await refresh()
   } else {
     // TODO: set an error message
+    alert('Update item failed')
   }
 }
 
@@ -160,7 +177,8 @@ async function refresh() {
   itemName.value = resp.result.itemName
   price.value = resp.result.price
   description.value = resp.result.description
-
+  date.value = resp.result.createTime
+  isDeleteButtonClicked.value = false
 }
 
 async function onSubmitImage() {
@@ -170,7 +188,7 @@ async function onSubmitImage() {
   const formData = new FormData()
   formData.append('file', imageData)
 
-  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { headers: { 'Content-Type': 'multipart/form-data' }, method: 'POST', body: formData })).json()
+  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { method: 'POST', body: formData })).json()
   if (res && res.status && res.status === 'ok') {
     await refresh()
     imageData = null
@@ -191,6 +209,18 @@ async function onSelect() {
   } else {
     alert('Please provide a image file')
   }
+}
+
+async function deleteItem() {
+  let res: DeleteResp = await (await fetch(`/api/items/${props.itemId}/remove-item`, { method: 'DELETE' })).json()
+  if (!res || !res.status || res.status !== 'ok') {
+    console.log(`UpdateItem->deleteItem: failed to delete item ${res}`)
+    return
+  }
+
+  // redirect to home page
+  const router = new VueRouter()
+  router.push('/')
 }
 
 onMounted(refresh)

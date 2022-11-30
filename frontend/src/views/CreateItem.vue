@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-    <!-- TODO: bind to v-model and add listeners -->
     <form>
       <div class="field">
         <label class="label">Item name</label>
@@ -74,7 +73,8 @@ async function submitForm() {
       itemName: itemName.value,
       createdBy: currentUser.preferred_username,
       price: price.value,
-      description: description.value
+      description: description.value,
+      createTime: new Date()
     }
   }
 
@@ -93,7 +93,7 @@ async function submitForm() {
     const router = new VueRouter()
     router.push(`/api/items/${res.itemId}/details`)
   } else {
-    // TODO: set an error message
+    alert('Failed to create item')
   }
 }
 

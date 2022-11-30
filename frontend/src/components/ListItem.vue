@@ -3,8 +3,7 @@
     <div class="card-content">
       <div class="media">
         <div class="media-left">
-          <figure class="image is-128x128 mr-5">
-            <!-- TODO: check if item has image -->
+          <figure class="image is-128x128 mr-5" v-if="(props.dbayItem.imageLink.length > 0)">
             <img :src="props.dbayItem.imageLink[0]" alt="item image" />
           </figure>
         </div>
@@ -27,8 +26,7 @@
 
     </div>
     <div class="card-footer">
-      <!-- TODO: link to actual pages -->
-      <a href="#" class="card-footer-item">Check Seller Info</a>
+      <a :href="`/users/${props.dbayItem.createdBy}/profile`" class="card-footer-item">Check Seller Info</a>
       <a :href="'/items/' + props.dbayItem._id + '/details'" class="card-footer-item">View Item Details</a>
     </div>
   </div>

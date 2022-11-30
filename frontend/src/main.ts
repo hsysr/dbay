@@ -6,6 +6,7 @@ import ItemDetail from '@/views/ItemDetail.vue'
 import UserProfile from '@/views/UserProfile.vue'
 import CreateItem from '@/views/CreateItem.vue'
 import UpdateUserProfile from '@/views/UpdateUserProfile.vue'
+import Search from '@/views/Search.vue'
 
 import 'bulma/css/bulma.css'
 
@@ -48,6 +49,28 @@ const router = new VueRouter({
       props(route) {
         return {
           username: route.params.username
+        }
+      }
+    },
+    {
+      path: '/search',
+      component: Search,
+      props(route) {
+        return {
+          paramKeyword: '',
+          paramSearchType: 'itemName',
+          paramFilterType: 'createTime'
+        }
+      }
+    },
+    {
+      path: '/search/:keyword/:searchType/:filterType',
+      component: Search,
+      props(route) {
+        return {
+          paramKeyword: route.params.keyword,
+          paramSearchType: route.params.searchType,
+          paramFilterType: route.params.filterType
         }
       }
     }

@@ -29,8 +29,6 @@
 <script setup lang="ts">
 import { Ref, ref } from 'vue'
 
-// const imageId: string = uuid()
-
 interface Props {
   imageLink: string
 }

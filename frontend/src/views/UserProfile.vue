@@ -3,7 +3,6 @@
     <section class="hero is-primary">
       <div class="hero-body">
         <p class="title has-text-centered">
-          <!-- TODO: fill username -->
           {{ dbayUser?.firstName }} {{ dbayUser?.lastName }} ({{ dbayUser?.username }})
         </p>
       </div>
@@ -16,14 +15,14 @@
       </header>
       <div class="card-content">
         <div class="content">
-          <p class="has-text-left">Email address: {{ dbayUser?.email }}</p>
-          <p class="has-text-left">Phone number: {{ dbayUser?.phone }}</p>
-          <p class="has-text-left">Address: {{ dbayUser?.address }}</p>
+          <p class="has-text-left" v-if="dbayUser?.email">Email address: {{ dbayUser?.email }}</p>
+          <p class="has-text-left" v-if="dbayUser?.phone">Phone number: {{ dbayUser?.phone }}</p>
+          <p class="has-text-left" v-if="dbayUser?.address">Address: {{ dbayUser?.address }}</p>
         </div>
       </div>
       <footer class="card-footer">
-        <a href="#" class="card-footer-item">All items on sale</a>
-        <a href="#" class="card-footer-item" v-if="dbayUser?.username === currentUser.preferred_username"></a>
+        <a :href="`/search/${dbayUser?.username}/itemName/createTime`" class="card-footer-item">All items on sale</a>
+        <a :href="`/users/${currentUser.preferred_username}/profile/update`" class="card-footer-item" v-if="dbayUser?.username === currentUser.preferred_username">Edit profile</a>
       </footer>
     </div>
   </div>
@@ -37,6 +36,10 @@ interface Props {
   username: string
 }
 
+interface ProfileResp {
+  dbayUser: DbayUser | undefined
+}
+
 const props = withDefaults(defineProps<Props>(), {
   username: ''
 })
@@ -47,9 +50,12 @@ const currentUser = ref({} as any)
 inject('user', currentUser)
 
 async function getUserProfile() {
-  // TODO: pull user profile from backend
-  let user = dbayUsers.find(dUser => dUser.username === props.username)
-  dbayUser.value = user
+  let res: ProfileResp = await( await fetch(`/api/users/${props.username}/profile`, {method: 'GET'}) ).json()
+  if (!res || !res.dbayUser) {
+    console.log(`UserProfile->getUserProfile: failed to get profile ${res}`)
+    return
+  }
+  dbayUser.value = { ...res.dbayUser }
 
   if (!dbayUser.value) {
     console.log('User not found')
