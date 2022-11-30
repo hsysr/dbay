@@ -253,7 +253,8 @@ client.connect().then(() => {
           await customers.insertOne(
             {
               _id,
-              name: userInfo.name,
+              firstName: userInfo.given_name,
+              lastName: userInfo.family_name,
               email: userInfo.email
             }
           )

@@ -3,7 +3,8 @@ import { customers, items } from './server'
 
 interface DbayUser {
   userName: string,
-  name: string,
+  firstName: string,
+  lastName: string,
   email: string | undefined,
   phone: string | undefined,
   address: string | undefined
@@ -22,7 +23,7 @@ interface DbayItem {
 export async function getUser(userName:string): Promise<undefined | DbayUser> {
   const customer = await customers.findOne({ _id: userName })
   if (customer == null) {return undefined}
-  return {userName, name: customer.name, email: customer.email, phone: customer.phone, address: customer.address}
+  return {userName, firstName: customer.firstName, lastName: customer.lastName, email: customer.email, phone: customer.phone, address: customer.address}
 } 
 
 export async function createItem(dbayItem: Omit<DbayItem, '_id' | 'imageLink'>) {
@@ -54,6 +55,23 @@ export async function deleteItem(itemId: string, userName: string) {
   }
   const result = await items.deleteOne( { _id: new ObjectId(itemId), createdBy: userName } )
   return result.deletedCount
+}
+
+export async function updateUser(dbayUser: Omit<DbayUser, 'email' | 'userName'>, userName: string) {
+  const result = await customers.updateOne(
+    {
+      _id: userName
+    },
+    {
+      $set: {
+        firstName: dbayUser.firstName,
+        lastName: dbayUser.lastName,
+        phone: dbayUser.phone,
+
+      }
+    }
+  )
+  return result.matchedCount
 }
 
 export async function updateItem(dbayItem: Omit<DbayItem, 'imageLink' | "createTime">) {
