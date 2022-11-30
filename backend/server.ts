@@ -8,7 +8,8 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink } from "./data"
+import fs from "fs"
 
 require('dotenv').config()
 
@@ -17,6 +18,9 @@ const client = new MongoClient(mongoUrl)
 let db: Db
 export let customers: Collection
 export let items: Collection
+
+const multer  = require('multer')
+const upload = multer({ dest: 'images/' })
 
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
@@ -72,10 +76,19 @@ app.get("/api/user", (req, res) => {
 app.get("/api/users/:username/profile", checkAuthenticated, async (req, res) => {
   const customer = await getUser(req.params.username)
   let status = 200
-  if (customer == undefined) {
+  if (customer === undefined) {
     status = 400
   }
-  res.status(status).json(customer)
+  res.status(status).json({ dbayUser: customer })
+})
+
+app.get("/api/items/:itemid/details", async (req, res) => {
+  const item = await getItem(req.params.itemid)
+  let status = 200
+  if (item === undefined) {
+    status = 400
+  }
+  res.status(status).json({ result: item })
 })
 
 app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
@@ -169,6 +182,37 @@ app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res
     res.status(200).json({ status: 'ok' })
   }
 })
+
+app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('file'), async (req, res) => {
+  const item = await getItem(req.params.itemid)
+  if (item === undefined) {
+    res.status(400).json({ status: "Cannot find item with given id" })
+    return
+  }
+  if (item.createdBy != (req.user as any).preferred_username) {
+    res.status(400).json({ status: "User name does not match" })
+    return
+  }
+
+
+  const imageType = (req as any).file.originalname.split(".").pop()
+  const newFileName = item._id + "_" + item.imageLink.length + "." + imageType
+  await new Promise((resolve, reject) => {
+    fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/" + newFileName, resolve)
+  })
+
+  await addImageLink(item._id, newFileName)
+
+  res.status(200).json({ status: "ok" })
+})
+
+app.get("/api/images/:filename", (req, res) => {
+  if (!fs.existsSync(__dirname + "/images/" + req.params.filename)) {
+    res.status(400).json({ status: "Image not found" })
+    return
+  }
+  res.status(200).sendFile(__dirname + "/images/" + req.params.filename)
+}) 
 
 app.post(
   "/api/logout", 
