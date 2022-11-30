@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser } from "./data"
 import fs from "fs"
 
 require('dotenv').config()
@@ -163,6 +163,36 @@ app.put("/api/items/update-item", checkAuthenticated, async (req, res) => {
 
     if (updateResult == 0) {
       res.status(400).json( { status: "Cannot find the user's item with given id" } )
+      return
+    }
+    else {
+      res.status(200).json({ status: 'ok' })
+      return
+    }
+  }
+  res.status(400).json({ status: "Payload type error" })
+})
+
+app.put("/api/users/:username/profile", checkAuthenticated, async (req, res) => {
+  if (typeof req.body.dbayUser.firstName === "string" &&
+      typeof req.body.dbayUser.lastName === "string" &&
+      typeof req.body.dbayUser.phone === "string" &&
+      typeof req.body.dbayUser.address === "string") {
+    if (req.params.username != (req.user as any).preferred_username) {
+      res.status(400).json({ status: "User name does not match" })
+      return
+    }
+
+    const updateResult = await updateUser(
+      {
+        firstName: req.body.dbayUser.firstName,
+        lastName: req.body.dbayUser.lastName,
+        phone: req.body.dbayUser.phone,
+        address: req.body.dbayUser.address
+      },
+      req.params.username)
+    if (updateResult == 0) {
+      res.status(400).json( { status: "Cannot find the user" } )
       return
     }
     else {

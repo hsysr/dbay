@@ -67,7 +67,7 @@ export async function updateUser(dbayUser: Omit<DbayUser, 'email' | 'userName'>,
         firstName: dbayUser.firstName,
         lastName: dbayUser.lastName,
         phone: dbayUser.phone,
-
+        address: dbayUser.address
       }
     }
   )
