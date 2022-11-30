@@ -79,7 +79,16 @@ app.get("/api/users/:username/profile", checkAuthenticated, async (req, res) => 
   if (customer === undefined) {
     status = 400
   }
-  res.status(status).json(customer)
+  res.status(status).json({ dbayUser: customer })
+})
+
+app.get("/api/items/:itemid/details", async (req, res) => {
+  const item = await getItem(req.params.itemid)
+  let status = 200
+  if (item === undefined) {
+    status = 400
+  }
+  res.status(status).json({ result: item })
 })
 
 app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
