@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem } from "./data"
+import { getUser, createItem, deleteItem } from "./data"
 
 require('dotenv').config()
 
@@ -113,10 +113,20 @@ app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
       return
     } 
     
-    res.status(200).json( { status: 'ok', itemId: result } )
+    res.status(200).json({ status: 'ok', itemId: result })
     return
   }
   res.status(400).json({ status: "Payload type error" })
+})
+
+app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res) => {
+  const deleteResult = await deleteItem(req.params.itemid, (req.user as any).preferred_username)
+  if (deleteResult == 0) {
+    res.status(400).json( { status: "Cannot find the user's item with given id" } )
+  }
+  else {
+    res.status(200).json({ status: 'ok' })
+  }
 })
 
 app.post(

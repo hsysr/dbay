@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb'
 import { customers, items } from './server'
 
 interface DbayUser {
@@ -32,6 +33,6 @@ export async function createItem(dbayItem: Omit<DbayItem, '_id' | 'imageLink'>) 
 }
 
 export async function deleteItem(itemId: string, userName: string) {
-  const result = await items.deleteOne( { _id: itemId, createdBy: userName } )
+  const result = await items.deleteOne( { _id: new ObjectId(itemId), createdBy: userName } )
   return result.deletedCount
 }
