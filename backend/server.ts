@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem } from "./data"
 import fs from "fs"
 
 require('dotenv').config()
@@ -234,6 +234,17 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
   await addImageLink(item._id, newFileName)
 
   res.status(200).json({ status: "ok" })
+})
+
+app.post("/api/items/search", async (req,res) => {
+  if ((req.body.searchType != "itemName" && req.body.searchType != "username") ||
+      (req.body.sortBy != "createTime" && req.body.sortBy != "priceHighToLow" && req.body.sortBy != "priceLowToHigh") ||
+      typeof req.body.keyword != "string") {
+    res.status(400).json({ status: "payload error" })
+    return
+  }
+  const searchResult = await searchItem(req.body.searchType, req.body.keyword, req.body.sortBy)
+  res.status(200).json({ items: searchResult })
 })
 
 app.get("/api/images/:filename", (req, res) => {
