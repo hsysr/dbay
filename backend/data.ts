@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb'
 import { customers, items } from './server'
 
-interface DbayUser {
+export interface DbayUser {
   userName: string,
   firstName: string,
   lastName: string,
@@ -10,7 +10,7 @@ interface DbayUser {
   address: string | undefined
 }
 
-interface DbayItem {
+export interface DbayItem {
   _id: string
   itemName: string,
   createdBy: string,

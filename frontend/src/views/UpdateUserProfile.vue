@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { DbayUser } from '../../.dummy/data';
+import { DbayUser } from '../../../backend/data';
 import { onMounted, ref, Ref } from 'vue'
 import { validateObject } from '@/helper'
 
@@ -70,19 +70,19 @@ async function refresh() {
     return
   }
   let profile: DbayUser = await (await fetch(`/api/users/${props.username}/profile`, { method: 'GET' })).json()
-  if (!profile || !validateObject(profile, 6) || profile.username !== props.username) {
+  if (!profile || !validateObject(profile, 6) || profile.userName !== props.username) {
     console.log(`UpdateUserProfile->refresh: Invalid response ${profile}`)
     return
   }
 
   firstName.value = profile.firstName
   lastName.value = profile.lastName
-  phoneNumber.value = profile.phone
-  address.value = profile.address
+  phoneNumber.value = profile.phone ? profile.phone : ''
+  address.value = profile.address ? profile.address : ''
 }
 
 async function submitForm() {
-  let payload: Omit<DbayUser, 'email' | 'username'> = {
+  let payload: Omit<DbayUser, 'email' | 'userName'> = {
     firstName: firstName.value,
     lastName: lastName.value,
     phone: phoneNumber.value,

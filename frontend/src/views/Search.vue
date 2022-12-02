@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { DbayItem } from '../../.dummy/data';
+import { DbayItem } from '../../../backend/data';
 import { SearchResult, searchItems } from '../helper'
 import ItemList from '@/components/ItemList.vue'
 

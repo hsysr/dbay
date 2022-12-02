@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { DbayItem, dbayItems } from '../../.dummy/data'
+import { DbayItem } from '../../../backend/data'
 import ImageWithPopupVue from '@/components/ImageWithPopup.vue';
 const dbayItem = ref({} as DbayItem)
 

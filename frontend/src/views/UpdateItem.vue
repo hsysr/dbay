@@ -77,7 +77,7 @@
 <script setup lang="ts">
 import Vue, { computed, inject, onMounted } from 'vue'
 import { ref, Ref } from 'vue'
-import { DbayItem, DbayUser } from '../../.dummy/data'
+import { DbayItem, DbayUser } from '../../../backend/data'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faDollarSign } from '@fortawesome/free-solid-svg-icons'

@@ -308,7 +308,7 @@ client.connect().then(() => {
     )    
 
     // start server
-    app.listen(port, () => {
+    app.listen(port, '127.0.0.1', () => {
       logger.info(`dbay server listening on port ${port}`)
     })
   })

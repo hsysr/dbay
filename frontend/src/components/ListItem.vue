@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { DbayItem } from '../../.dummy/data'
+import { DbayItem } from '../../../backend/data'
 interface Props {
   dbayItem: DbayItem
 }

@@ -3,7 +3,7 @@
     <section class="hero is-primary">
       <div class="hero-body">
         <p class="title has-text-centered">
-          {{ dbayUser?.firstName }} {{ dbayUser?.lastName }} ({{ dbayUser?.username }})
+          {{ dbayUser?.firstName }} {{ dbayUser?.lastName }} ({{ dbayUser?.userName }})
         </p>
       </div>
     </section>
@@ -21,15 +21,15 @@
         </div>
       </div>
       <footer class="card-footer">
-        <a :href="`/search/${dbayUser?.username}/itemName/createTime`" class="card-footer-item">All items on sale</a>
-        <a :href="`/users/${currentUser.preferred_username}/profile/update`" class="card-footer-item" v-if="dbayUser?.username === currentUser.preferred_username">Edit profile</a>
+        <a :href="`/search/${dbayUser?.userName}/itemName/createTime`" class="card-footer-item">All items on sale</a>
+        <a :href="`/users/${currentUser.preferred_username}/profile/update`" class="card-footer-item" v-if="dbayUser?.userName === currentUser.preferred_username">Edit profile</a>
       </footer>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { DbayUser, dbayUsers } from '../../.dummy/data'
+import { DbayUser } from '../../../backend/data'
 import { inject, onMounted, ref, Ref } from 'vue';
 
 interface Props {
@@ -56,6 +56,8 @@ async function getUserProfile() {
     return
   }
   dbayUser.value = { ...res.dbayUser }
+  console.log('UserProfile->getUserProfile:')
+  console.log(dbayUser.value)
 
   if (!dbayUser.value) {
     console.log('User not found')

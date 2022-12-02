@@ -8,7 +8,7 @@
 import {onMounted, ref} from 'vue'
 import ItemList from '../components/ItemList.vue'
 import { searchItems } from '@/helper';
-import { DbayItem } from '.dummy/data';
+import { DbayItem } from '../../../backend/data';
 
 const itemList = ref([] as DbayItem[])
 

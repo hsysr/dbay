@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, Ref } from 'vue';
-import { DbayItem, dbayItems } from '../../.dummy/data'
+import { DbayItem } from '../../../backend/data'
 import ListItem from './ListItem.vue'
 
 let pageOffset = ref(0)

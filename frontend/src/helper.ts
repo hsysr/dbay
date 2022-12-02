@@ -1,4 +1,4 @@
-import { DbayItem } from '.dummy/data'
+import { DbayItem } from '../../backend/data'
 interface SearchResult {
   items: DbayItem[]
 }
