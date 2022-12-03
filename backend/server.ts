@@ -10,6 +10,7 @@ import passport from 'passport'
 import { keycloak } from "./secrets"
 import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem } from "./data"
 import fs from "fs"
+import { v4 as uuidv4 } from 'uuid'
 
 require('dotenv').config()
 
@@ -217,16 +218,18 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
   const item = await getItem(req.params.itemid)
   if (item === undefined) {
     res.status(400).json({ status: "Cannot find item with given id" })
+    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
   if (item.createdBy != (req.user as any).preferred_username) {
     res.status(400).json({ status: "User name does not match" })
+    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
 
 
   const imageType = (req as any).file.originalname.split(".").pop()
-  const newFileName = item._id + "_" + item.imageLink.length + "." + imageType
+  const newFileName = uuidv4() + "." + imageType
   await new Promise((resolve, reject) => {
     fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/" + newFileName, resolve)
   })
