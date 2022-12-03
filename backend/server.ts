@@ -19,6 +19,7 @@ const client = new MongoClient(mongoUrl)
 let db: Db
 export let customers: Collection
 export let items: Collection
+let admins: Collection
 
 const multer  = require('multer')
 const upload = multer({ dest: 'images/' })
@@ -69,6 +70,18 @@ function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
 
   next()
 }
+
+function checkAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!((req.user as any).roles == "Admin")) {
+    res.sendStatus(401)
+    return
+  }
+  next()
+}
+
+app.get("/api/testadmin", checkAuthenticated, checkAdmin, (req, res) => {
+  res.status(200).json("You are admin")
+})
 
 app.get("/api/user", (req, res) => {
   res.json(req.user || {})
@@ -276,6 +289,7 @@ client.connect().then(() => {
   db = client.db("test")
   customers = db.collection('customers')
   items = db.collection('items')
+  admins = db.collection('admins')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/dbay/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -292,18 +306,25 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const customer = await customers.findOne({ _id })
-        if (customer == null) {
-          await customers.insertOne(
-            {
-              _id,
-              firstName: userInfo.given_name,
-              lastName: userInfo.family_name,
-              email: userInfo.email
-            }
-          )
+        const admin = await admins.findOne({ _id })
+        if (admin != null) {
+          userInfo.roles = "Admin"
         }
-        return done(null, userInfo)
+        else {
+          const customer = await customers.findOne({ _id })
+          if (customer == null) {
+            await customers.insertOne(
+              {
+                _id,
+                firstName: userInfo.given_name,
+                lastName: userInfo.family_name,
+                email: userInfo.email
+              }
+            )
+          }
+          userInfo.roles = "Customer"
+        }
+        return done(null, userInfo) 
       }
     ))
 
