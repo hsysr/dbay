@@ -14,7 +14,7 @@ const itemList = ref([] as DbayItem[])
 
 async function refresh() {
   let res = await searchItems('')
-  itemList.value = { ...res.items }
+  itemList.value = res.items
 }
 
 onMounted(refresh)

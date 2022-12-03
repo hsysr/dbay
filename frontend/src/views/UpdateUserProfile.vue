@@ -82,11 +82,13 @@ async function refresh() {
 }
 
 async function submitForm() {
-  let payload: Omit<DbayUser, 'email' | 'userName'> = {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    phone: phoneNumber.value,
-    address: address.value
+  let payload = {
+    dbayUser: {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      phone: phoneNumber.value,
+      address: address.value
+    }
   }
 
   let res: UpdateResp = await (await fetch(`/api/users/${props.username}/profile`, { headers: { 'Content-Type': 'application/json' }, method: 'PUT', body: JSON.stringify(payload) })).json()

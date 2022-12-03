@@ -7,6 +7,7 @@ import UserProfile from '@/views/UserProfile.vue'
 import CreateItem from '@/views/CreateItem.vue'
 import UpdateUserProfile from '@/views/UpdateUserProfile.vue'
 import Search from '@/views/Search.vue'
+import UpdateItem from '@/views/UpdateItem.vue'
 
 import 'bulma/css/bulma.css'
 
@@ -14,7 +15,7 @@ Vue.config.productionTip = false
 Vue.config.devtools = true
 Vue.use(VueRouter)
 
-const router = new VueRouter({
+export const router = new VueRouter({
   mode: 'history',
   routes: [
     {
@@ -31,7 +32,17 @@ const router = new VueRouter({
       }
     },
     {
+      path: '/items/:itemId/update',
+      component: UpdateItem,
+      props(route) {
+        return {
+          itemId: route.params.itemId
+        }
+      }
+    },
+    {
       path: '/users/:username/profile',
+      name: 'userProfile',
       component: UserProfile,
       props(route) {
         return {
@@ -65,6 +76,7 @@ const router = new VueRouter({
     },
     {
       path: '/search/:keyword/:searchType/:filterType',
+      name: 'searchWithParams',
       component: Search,
       props(route) {
         return {

@@ -84,8 +84,12 @@ async function doSearch() {
     console.log(`Search->refresh: search failed ${payload} $res`)
     return
   }
-
-  items.value = { ...res.items }
+  console.log('Search->doSearch:')
+  console.log('search res:')
+  console.log(res)
+  console.log('items:')
+  items.value = res.items
+  console.log(items.value)
 }
 
 // async function changePage(next: number) {

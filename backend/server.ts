@@ -92,7 +92,7 @@ app.get("/api/items/:itemid/details", async (req, res) => {
 })
 
 app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
-
+  console.log(req.body.dbayItem)
   //Check payload content
   if (typeof req.body.dbayItem.itemName === "string" &&
       typeof req.body.dbayItem.createdBy === "string" &&
