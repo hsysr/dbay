@@ -79,6 +79,10 @@ function checkAdmin(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
+app.get("/api/users/is-admin", (req, res) => {
+  res.status(200).json({ isAdmin: req.user != undefined && (req.user as any).roles == "Admin" })
+})
+
 app.get("/api/testadmin", checkAuthenticated, checkAdmin, (req, res) => {
   res.status(200).json("You are admin")
 })
