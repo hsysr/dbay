@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb'
 import { customers, items } from './server'
 
-interface DbayUser {
+export interface DbayUser {
   userName: string,
   firstName: string,
   lastName: string,
@@ -10,7 +10,7 @@ interface DbayUser {
   address: string | undefined
 }
 
-interface DbayItem {
+export interface DbayItem {
   _id: string
   itemName: string,
   createdBy: string,
@@ -109,4 +109,34 @@ export async function addImageLink(itemId: string, filename: string) {
     }
   )
   return result.matchedCount
+}
+
+export async function searchItem(searchType: "itemName" | "username", keyword: string, sortBy: 'createTime' | 'priceHighToLow' | 'priceLowToHigh') {
+  let orderKey = {}
+  switch (sortBy) {
+    case "createTime": {
+      orderKey = { createTime: -1 }
+      break
+    }
+    case "priceHighToLow": {
+      orderKey = { price: -1 }
+      break
+    }
+    case "priceLowToHigh": {
+      orderKey = { price: 1 }
+      break
+    }
+  }
+  let searchKey = {}
+  if (searchType == "itemName") {
+    searchKey = { itemName: { $regex: keyword } }
+  }
+  else {
+    searchKey = { createdBy: { $regex: keyword } }
+  }
+  const cursor = await items.find(searchKey).sort(orderKey)
+  const searchResult = (await cursor.toArray()).map(document => {
+    return {...document, _id: document._id.toString()}
+  })
+  return searchResult
 }

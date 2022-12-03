@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem } from "./data"
 import fs from "fs"
 
 require('dotenv').config()
@@ -92,7 +92,7 @@ app.get("/api/items/:itemid/details", async (req, res) => {
 })
 
 app.post("/api/items/create-item", checkAuthenticated, async (req, res) => {
-
+  console.log(req.body.dbayItem)
   //Check payload content
   if (typeof req.body.dbayItem.itemName === "string" &&
       typeof req.body.dbayItem.createdBy === "string" &&
@@ -236,6 +236,17 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
   res.status(200).json({ status: "ok" })
 })
 
+app.post("/api/items/search", async (req,res) => {
+  if ((req.body.searchType != "itemName" && req.body.searchType != "username") ||
+      (req.body.sortBy != "createTime" && req.body.sortBy != "priceHighToLow" && req.body.sortBy != "priceLowToHigh") ||
+      typeof req.body.keyword != "string") {
+    res.status(400).json({ status: "payload error" })
+    return
+  }
+  const searchResult = await searchItem(req.body.searchType, req.body.keyword, req.body.sortBy)
+  res.status(200).json({ items: searchResult })
+})
+
 app.get("/api/images/:filename", (req, res) => {
   if (!fs.existsSync(__dirname + "/images/" + req.params.filename)) {
     res.status(400).json({ status: "Image not found" })
@@ -308,7 +319,7 @@ client.connect().then(() => {
     )    
 
     // start server
-    app.listen(port, () => {
+    app.listen(port, '127.0.0.1', () => {
       logger.info(`dbay server listening on port ${port}`)
     })
   })
