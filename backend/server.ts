@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem, deleteImageLink } from "./data"
 import fs from "fs"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -71,20 +71,8 @@ function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
   next()
 }
 
-function checkAdmin(req: Request, res: Response, next: NextFunction) {
-  if (!((req.user as any).roles == "Admin")) {
-    res.sendStatus(401)
-    return
-  }
-  next()
-}
-
 app.get("/api/users/is-admin", (req, res) => {
   res.status(200).json({ isAdmin: req.user != undefined && (req.user as any).roles == "Admin" })
-})
-
-app.get("/api/testadmin", checkAuthenticated, checkAdmin, (req, res) => {
-  res.status(200).json("You are admin")
 })
 
 app.get("/api/user", (req, res) => {
@@ -253,6 +241,25 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
 
   await addImageLink(item._id, newFileName)
 
+  res.status(200).json({ status: "ok" })
+})
+
+app.get("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, async (req, res) => {
+  const item = await getItem(req.params.itemid)
+  if (item == undefined) {
+    res.status(400).json({ status: "Item with given id not found" })
+    return
+  }
+  if (item.createdBy != (req.user as any).preferred_username && (req.user as any).roles != "Admin") {
+    res.status(400).json({ status: "You don't have access to the image" })
+    return
+  }
+  const deleteResult = await deleteImageLink(req.params.itemid, "api/images/" + req.params.imagename)
+  if (deleteResult == 0) {
+    res.status(400).json({ status: "Image not found" })
+    return
+  }
+  fs.unlinkSync(__dirname + "/images/" + req.params.imagename)
   res.status(200).json({ status: "ok" })
 })
 
