@@ -58,6 +58,9 @@ import { router } from './main'
 const user = ref({} as any)
 provide("user", user)
 
+const isAdmin = ref(false)
+provide("isAdmin", isAdmin)
+
 const navbarMenu = ref(null as HTMLElement | null)
 const navbarBurger = ref(null as HTMLElement | null)
 
@@ -76,6 +79,15 @@ onMounted(async () => {
   console.log('user info:')
   console.log(user.value)
   console.log(user.value.name)
+
+  interface IsAdminResp {
+    isAdmin: boolean
+  }
+  let res: IsAdminResp = await (await fetch('/api/users/is-admin', {method: 'GET'})).json()
+  console.log('isAdmin')
+  console.log(res)
+  console.log(user.value.roles)
+  isAdmin.value = res.isAdmin
 })
 
 async function logout() {

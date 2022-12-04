@@ -37,6 +37,17 @@
 
     </form>
 
+    <article class="message is-link" v-if="imageLinks && imageLinks.length > 0">
+      <div class="message-header">
+        <p>Images:</p>
+      </div>
+      <div class="message-body">
+        <div class="box">
+          <ImageWithPopup v-for="imgLink, idx in imageLinks" :key="idx" :imageLink="imgLink" :isEdit="true" @delete-img="deleteImage"/>
+        </div>
+      </div>
+    </article>
+
     <!-- Upload image -->
     <form @submit.prevent="onSubmitImage" enctype="multipart/form-data">
       <div class="field">
@@ -78,6 +89,7 @@
 import Vue, { computed, inject, onMounted } from 'vue'
 import { ref, Ref } from 'vue'
 import { DbayItem, DbayUser } from '../../../backend/data'
+import ImageWithPopup from '../components/ImageWithPopup.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faDollarSign } from '@fortawesome/free-solid-svg-icons'
@@ -121,6 +133,8 @@ const description = ref('')
 const fileUploadField: Ref<HTMLInputElement | null> = ref(null)
 const date = ref(new Date())
 const isDeleteButtonClicked = ref(false)
+const imageLinks = ref([] as string[])
+const createdBy = ref('')
 
 const imageName = ref('')
 let imageData: File | null = null
@@ -137,7 +151,7 @@ async function submitForm() {
     dbayItem: {
       _id: props.itemId,
       itemName: itemName.value,
-      createdBy: currentUser.value.preferred_username,
+      createdBy: createdBy.value,
       price: price.value,
       description: description.value,
       createTime: date.value
@@ -179,6 +193,8 @@ async function refresh() {
   description.value = resp.result.description
   date.value = resp.result.createTime
   isDeleteButtonClicked.value = false
+  createdBy.value = resp.result.createdBy
+  imageLinks.value = resp.result.imageLink.map(link => `http://127.0.0.1:8095/${link}`)
 }
 
 async function onSubmitImage() {
@@ -223,6 +239,31 @@ async function deleteItem() {
 
 async function onClickDeleteButton() {
   isDeleteButtonClicked.value = !isDeleteButtonClicked.value
+}
+
+async function deleteImage(imgLink: string) {
+  const expr = /\/api\/images\/(.+)/i
+  let matchResult = imgLink.match(expr)
+
+  if (!matchResult) {
+    console.log('UpdateItem->deleteImage: invalid image link')
+    return
+  }
+
+  imgLink = matchResult[0]
+
+  interface DeleteImageResp {
+    status: string
+  }
+  console.log(`Trying to delete ${imgLink}`)
+  let res: DeleteImageResp = await ( await fetch(`/api/items/${props.itemId}/images/${imgLink}`, { method: 'DELETE' }) ).json()
+  if (!res || !res.status || res.status !== 'ok') {
+    console.log(`UpdateItem->deleteImage: failed to delete image ${imgLink}`)
+    console.log(res)
+    return
+  }
+
+  await refresh()
 }
 
 onMounted(refresh)

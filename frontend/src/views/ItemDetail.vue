@@ -35,7 +35,7 @@
       </div>
     </article>
     
-    <div class="field">
+    <div class="field" v-if="(dbayItem.createdBy === currentUser.preferred_username || currentUserIsAdmin)">
       <a :href="`/items/${dbayItem._id}/update`">
         <button class="button is-link mt-5 ml-3" >Update Item</button>
       </a>
@@ -52,6 +52,7 @@ import ImageWithPopupVue from '../components/ImageWithPopup.vue'
 
 const dbayItem = ref({} as DbayItem)
 const currentUser: Ref<any> = inject("user")!
+const currentUserIsAdmin: Ref<boolean> = inject("isAdmin")!
 
 interface Props {
   itemId?: string

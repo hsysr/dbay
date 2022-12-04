@@ -18,6 +18,7 @@
           <p class="image">
             <img :src="imageLink" />
           </p>
+          <button v-if="props.isEdit" class="button is-danger" @click="$emit('delete-img', imageLink)" >Delete image</button>
         </section>
 
       </div>
@@ -30,11 +31,13 @@
 import { Ref, ref } from 'vue'
 
 interface Props {
-  imageLink: string
+  imageLink: string,
+  isEdit: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  imageLink: ''
+  imageLink: '',
+  isEdit: false
 })
 
 const modalDiv: Ref<HTMLElement | null> = ref(null)
