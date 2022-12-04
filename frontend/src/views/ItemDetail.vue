@@ -66,6 +66,23 @@ const props = withDefaults(defineProps<Props>(), {
   itemId: undefined
 })
 
+async function getImageBase64() {
+  interface ImageStrResp {
+    imgStr: string
+  }
+  let imageArr = [] as string[]
+  dbayItem.value.imageLink.forEach(async (link) => {
+    let res: ImageStrResp = await ( await fetch(link, {method: 'GET'}) ).json()
+    if (!res || !res.imgStr) {
+      return
+    }
+
+    imageArr.push(res.imgStr)
+  })
+
+  dbayItem.value.imageLink = JSON.parse(JSON.stringify(imageArr))
+}
+
 async function getItemDetails() {
 
   let item: ItemDetailsResp = await (await fetch(`/api/items/${props.itemId}/details`, { method:'GET' })).json()
@@ -82,7 +99,7 @@ async function getItemDetails() {
   console.log(dbayItem.value)
 
   // add a slash in front of each img link
-  dbayItem.value.imageLink = dbayItem.value.imageLink.map(link => `http://127.0.0.1:8095/${link}`)
+  dbayItem.value.imageLink = dbayItem.value.imageLink.map(link => `http://127.0.0.1:8080/${link}`)
   console.log(dbayItem.value.imageLink)
 }
 

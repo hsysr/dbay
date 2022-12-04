@@ -97,9 +97,5 @@ test('remove item test', async ({ page }) => {
     await page.locator('#profile-button').click()
     await page.locator('#user-items').click()
 
-    let newItemsCount = await page.locator('.card').count()
-    expect(newItemsCount == itemsCount - 1).toBeTruthy()
+    await expect(page.locator('#search-results')).toHaveText('No items found')
 })
-
-// //*[@id="search-results"]/div/div/div[1]/div[1]/div/div[2]/div[1]/div/p[1]
-// //*[@id="search-results"]/div/div/div[1]

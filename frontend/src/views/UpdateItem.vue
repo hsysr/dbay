@@ -137,7 +137,7 @@ const imageLinks = ref([] as string[])
 const createdBy = ref('')
 
 const imageName = ref('')
-let imageData: File | null = null
+let imageData: string | undefined = undefined
 const uploaderPrompt = computed(() => {
   if (!imageName.value) {
     return 'Choose an image...'
@@ -194,7 +194,7 @@ async function refresh() {
   date.value = resp.result.createTime
   isDeleteButtonClicked.value = false
   createdBy.value = resp.result.createdBy
-  imageLinks.value = resp.result.imageLink.map(link => `http://127.0.0.1:8095/${link}`)
+  imageLinks.value = resp.result.imageLink.map(link => `http://127.0.0.1:8080/${link}`)
 }
 
 async function onSubmitImage() {
@@ -204,10 +204,18 @@ async function onSubmitImage() {
   const formData = new FormData()
   formData.append('file', imageData)
 
-  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { method: 'POST', body: formData })).json()
+  interface SubmitImageReq {
+    imgStr: string
+  }
+
+  let payload: SubmitImageReq = {
+    imgStr: imageData
+  }
+
+  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { method: 'POST', body: JSON.stringify(payload) })).json()
   if (res && res.status && res.status === 'ok') {
     await refresh()
-    imageData = null
+    imageData = undefined
     imageName.value = ''
   } else {
     console.log(`UpdateItem->onSubmitImage: failed with response ${res}`)
@@ -220,7 +228,15 @@ async function onSelect() {
   }
   let f = fileUploadField.value.files[0]
   if (f.type.match('image.*')) {
-    imageData = f
+    let reader = new FileReader()
+    reader.onload = () => {
+      imageData = reader.result?.toString()
+    }
+    reader.readAsDataURL(f)
+    console.log('image b64 string is')
+    console.log(imageData)
+
+    // imageData = f
     imageName.value = f.name
   } else {
     alert('Please provide a image file')
@@ -250,13 +266,14 @@ async function deleteImage(imgLink: string) {
     return
   }
 
-  imgLink = matchResult[0]
+  imgLink = matchResult[1]
+
 
   interface DeleteImageResp {
     status: string
   }
   console.log(`Trying to delete ${imgLink}`)
-  let res: DeleteImageResp = await ( await fetch(`/api/items/${props.itemId}/images/${imgLink}`, { method: 'DELETE' }) ).json()
+  let res: DeleteImageResp = await ( await fetch(`/api/items/${props.itemId}/remove-image/${imgLink}`, { method: 'DELETE' }) ).json()
   if (!res || !res.status || res.status !== 'ok') {
     console.log(`UpdateItem->deleteImage: failed to delete image ${imgLink}`)
     console.log(res)
