@@ -210,7 +210,16 @@ app.put("/api/users/:username/profile", checkAuthenticated, async (req, res) => 
 })
 
 app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res) => {
-  const deleteResult = await deleteItem(req.params.itemid, (req.user as any).preferred_username)
+  let createdBy = (req.user as any).preferred_username
+  if ((req.user as any).roles == "Admin") {
+    const item = await getItem(req.params.itemid)
+    if (item == undefined) {
+      res.status(400).json({ status: "Cannot find the user's item with given id" })
+      return
+    }
+    createdBy = item.createdBy
+  }
+  const deleteResult = await deleteItem(req.params.itemid, createdBy)
   if (deleteResult == 0) {
     res.status(400).json( { status: "Cannot find the user's item with given id" } )
   }
@@ -244,7 +253,7 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
   res.status(200).json({ status: "ok" })
 })
 
-app.get("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, async (req, res) => {
+app.delete("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, async (req, res) => {
   const item = await getItem(req.params.itemid)
   if (item == undefined) {
     res.status(400).json({ status: "Item with given id not found" })
