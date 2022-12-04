@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem, deleteImageLink } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImage, updateUser, searchItem, deleteImage } from "./data"
 import fs from "fs"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -31,6 +31,7 @@ let db: Db
 export let customers: Collection
 export let items: Collection
 let admins: Collection
+export let images: Collection
 
 const multer  = require('multer')
 const upload = multer({ dest: 'images/' })
@@ -245,27 +246,22 @@ app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res
   }
 })
 
-app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('file'), async (req, res) => {
+app.post("/api/items/:itemid/upload-image", checkAuthenticated, async (req, res) => {
+  if (typeof req.body.imgStr !== "string") {
+    res.status(400).json({ status: "payload error" })
+    return
+  }
   const item = await getItem(req.params.itemid)
   if (item === undefined) {
     res.status(400).json({ status: "Cannot find item with given id" })
-    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
   if (item.createdBy != (req.user as any).preferred_username) {
     res.status(400).json({ status: "User name does not match" })
-    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
 
-
-  const imageType = (req as any).file.originalname.split(".").pop()
-  const newFileName = uuidv4() + "." + imageType
-  await new Promise((resolve, reject) => {
-    fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/" + newFileName, resolve)
-  })
-
-  await addImageLink(item._id, newFileName)
+  await addImage(req.params.itemid, uuidv4(), req.body.imgStr)
 
   res.status(200).json({ status: "ok" })
 })
@@ -280,12 +276,11 @@ app.delete("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, asy
     res.status(400).json({ status: "You don't have access to the image" })
     return
   }
-  const deleteResult = await deleteImageLink(req.params.itemid, "api/images/" + req.params.imagename)
+  const deleteResult = await deleteImage(req.params.itemid, req.params.imagename)
   if (deleteResult == 0) {
     res.status(400).json({ status: "Image not found" })
     return
   }
-  fs.unlinkSync(__dirname + "/images/" + req.params.imagename)
   res.status(200).json({ status: "ok" })
 })
 
@@ -300,12 +295,13 @@ app.post("/api/items/search", async (req,res) => {
   res.status(200).json({ items: searchResult })
 })
 
-app.get("/api/images/:filename", (req, res) => {
-  if (!fs.existsSync(__dirname + "/images/" + req.params.filename)) {
+app.get("/api/images/:filename", async (req, res) => {
+  const file = await images.findOne({_id: req.params.filename})
+  if (file == null) {
     res.status(400).json({ status: "Image not found" })
     return
   }
-  res.status(200).sendFile(__dirname + "/images/" + req.params.filename)
+  res.status(200).json({ status: "ok", imgStr: file.content })
 }) 
 
 app.post(
@@ -327,6 +323,7 @@ client.connect().then(() => {
   customers = db.collection('customers')
   items = db.collection('items')
   admins = db.collection('admins')
+  images = db.collection('images')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/dbay/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
