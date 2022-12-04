@@ -145,9 +145,14 @@ app.put("/api/items/update-item", checkAuthenticated, async (req, res) => {
       typeof req.body.dbayItem.createdBy === "string" &&
       typeof req.body.dbayItem.price === "number" &&
       typeof req.body.dbayItem.description === "string") {
+    const item = await getItem(req.body.dbayItem._id)
+    if (item == undefined) {
+      res.status(400).json({ status: "Item not found" })
+    }
+
     //User cannot create other user's item
-    if (req.body.dbayItem.createdBy != (req.user as any).preferred_username) {
-      res.status(400).json({ status: "User name does not match" })
+    if (item.createdBy != (req.user as any).preferred_username && (req.user as any).roles != "Admin") {
+      res.status(400).json({ status: "Don't have access to the item" })
       return
     }
 
@@ -161,7 +166,7 @@ app.put("/api/items/update-item", checkAuthenticated, async (req, res) => {
       {
         _id: req.body.dbayItem._id,
         itemName: req.body.dbayItem.itemName,
-        createdBy: req.body.dbayItem.createdBy,
+        createdBy: item.createdBy,
         price: req.body.dbayItem.price,
         description: req.body.dbayItem.description
       }
@@ -213,7 +218,7 @@ app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res
   let createdBy = (req.user as any).preferred_username
   if ((req.user as any).roles == "Admin") {
     const item = await getItem(req.params.itemid)
-    if (item == undefined) {
+    if (item === undefined) {
       res.status(400).json({ status: "Cannot find the user's item with given id" })
       return
     }
@@ -255,7 +260,7 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
 
 app.delete("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, async (req, res) => {
   const item = await getItem(req.params.itemid)
-  if (item == undefined) {
+  if (item === undefined) {
     res.status(400).json({ status: "Item with given id not found" })
     return
   }
