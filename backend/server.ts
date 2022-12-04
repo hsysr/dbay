@@ -8,8 +8,9 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem, deleteImageLink } from "./data"
 import fs from "fs"
+import { v4 as uuidv4 } from 'uuid'
 
 require('dotenv').config()
 
@@ -18,6 +19,7 @@ const client = new MongoClient(mongoUrl)
 let db: Db
 export let customers: Collection
 export let items: Collection
+let admins: Collection
 
 const multer  = require('multer')
 const upload = multer({ dest: 'images/' })
@@ -68,6 +70,10 @@ function checkAuthenticated(req: Request, res: Response, next: NextFunction) {
 
   next()
 }
+
+app.get("/api/users/is-admin", (req, res) => {
+  res.status(200).json({ isAdmin: req.user != undefined && (req.user as any).roles == "Admin" })
+})
 
 app.get("/api/user", (req, res) => {
   res.json(req.user || {})
@@ -217,22 +223,43 @@ app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('f
   const item = await getItem(req.params.itemid)
   if (item === undefined) {
     res.status(400).json({ status: "Cannot find item with given id" })
+    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
   if (item.createdBy != (req.user as any).preferred_username) {
     res.status(400).json({ status: "User name does not match" })
+    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
 
 
   const imageType = (req as any).file.originalname.split(".").pop()
-  const newFileName = item._id + "_" + item.imageLink.length + "." + imageType
+  const newFileName = uuidv4() + "." + imageType
   await new Promise((resolve, reject) => {
     fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/" + newFileName, resolve)
   })
 
   await addImageLink(item._id, newFileName)
 
+  res.status(200).json({ status: "ok" })
+})
+
+app.get("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, async (req, res) => {
+  const item = await getItem(req.params.itemid)
+  if (item == undefined) {
+    res.status(400).json({ status: "Item with given id not found" })
+    return
+  }
+  if (item.createdBy != (req.user as any).preferred_username && (req.user as any).roles != "Admin") {
+    res.status(400).json({ status: "You don't have access to the image" })
+    return
+  }
+  const deleteResult = await deleteImageLink(req.params.itemid, "api/images/" + req.params.imagename)
+  if (deleteResult == 0) {
+    res.status(400).json({ status: "Image not found" })
+    return
+  }
+  fs.unlinkSync(__dirname + "/images/" + req.params.imagename)
   res.status(200).json({ status: "ok" })
 })
 
@@ -273,6 +300,7 @@ client.connect().then(() => {
   db = client.db("test")
   customers = db.collection('customers')
   items = db.collection('items')
+  admins = db.collection('admins')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/dbay/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -289,18 +317,25 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const customer = await customers.findOne({ _id })
-        if (customer == null) {
-          await customers.insertOne(
-            {
-              _id,
-              firstName: userInfo.given_name,
-              lastName: userInfo.family_name,
-              email: userInfo.email
-            }
-          )
+        const admin = await admins.findOne({ _id })
+        if (admin != null) {
+          userInfo.roles = "Admin"
         }
-        return done(null, userInfo)
+        else {
+          const customer = await customers.findOne({ _id })
+          if (customer == null) {
+            await customers.insertOne(
+              {
+                _id,
+                firstName: userInfo.given_name,
+                lastName: userInfo.family_name,
+                email: userInfo.email
+              }
+            )
+          }
+          userInfo.roles = "Customer"
+        }
+        return done(null, userInfo) 
       }
     ))
 
