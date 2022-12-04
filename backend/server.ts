@@ -284,12 +284,13 @@ app.post("/api/items/search", async (req,res) => {
   res.status(200).json({ items: searchResult })
 })
 
-app.get("/api/images/:filename", (req, res) => {
-  if (!fs.existsSync(__dirname + "/images/" + req.params.filename)) {
+app.get("/api/images/:filename", async (req, res) => {
+  const file = await images.findOne({_id: req.params.filename})
+  if (file == null) {
     res.status(400).json({ status: "Image not found" })
     return
   }
-  res.status(200).sendFile(__dirname + "/images/" + req.params.filename)
+  res.status(200).json({ status: "ok", imgStr: file.content })
 }) 
 
 app.post(
