@@ -60,13 +60,13 @@
     </form>
     <div class="field">
       <div class="control">
-        <button class="button is-danger" @click="onClickDeleteButton">Delete Item</button>
+        <button class="button is-danger" id="delete-attempt" @click="onClickDeleteButton">Delete Item</button>
         <div class="message is-danger" v-if="isDeleteButtonClicked">
           <div class="message-header">
             Do you really wish to delete the item?
           </div>
           <div class="message-body">
-            <button class="button is-danger" @click="deleteItem">DELETE</button>
+            <button class="button is-danger" id="delete-confirm" @click="deleteItem">DELETE</button>
           </div>
         </div>
       </div>

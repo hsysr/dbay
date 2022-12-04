@@ -4,34 +4,34 @@
       <div class="field">
         <label class="label">First name</label>
         <div class="control">
-          <input v-model="firstName" class="input" type="text" :placeholder="firstName" />
+          <input v-model="firstName" class="input" id="firstname-field" type="text" :placeholder="firstName" />
         </div>
       </div>
 
       <div class="field">
         <label class="label">Last name</label>
         <div class="control">
-          <input v-model="lastName" class="input" type="text" :placeholder="lastName" />
+          <input v-model="lastName" class="input" id="lastname-field" type="text" :placeholder="lastName" />
         </div>
       </div>
 
       <div class="field">
         <label class="label">Phone number</label>
         <div class="control">
-          <input v-model="phoneNumber" class="input" type="text" :placeholder="phoneNumber" />
+          <input v-model="phoneNumber" class="input" id="phone-field" type="text" :placeholder="phoneNumber" />
         </div>
       </div>
 
       <div class="field">
         <label class="label">Address</label>
         <div class="control">
-          <input v-model="address" class="textarea" :placeholder="address" />
+          <input v-model="address" class="textarea" id="address-field" :placeholder="address" />
         </div>
       </div>
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button is-primary" @click.prevent="submitForm">Submit</button>
+          <button class="button is-primary" id="submit-button" @click.prevent="submitForm">Submit</button>
         </div>
       </div>
     </form>
@@ -41,7 +41,6 @@
 <script setup lang="ts">
 import { DbayUser } from '../../../backend/data';
 import { onMounted, ref, Ref } from 'vue'
-import { validateObject } from '@/helper'
 
 interface Props {
   username: string
@@ -69,16 +68,17 @@ async function refresh() {
     console.log(`UpdateUserProfile->refresh: invalid username ${props.username}`)
     return
   }
-  let profile: DbayUser = await (await fetch(`/api/users/${props.username}/profile`, { method: 'GET' })).json()
-  if (!profile || !validateObject(profile, 6) || profile.userName !== props.username) {
-    console.log(`UpdateUserProfile->refresh: Invalid response ${profile}`)
+  let profile = await (await fetch(`/api/users/${props.username}/profile`, { method: 'GET' })).json()
+  if (!profile || !profile.dbayUser || profile.dbayUser.userName !== props.username) {
+    console.log(`UpdateUserProfile->refresh: Invalid response`)
+    console.log(profile)
     return
   }
 
-  firstName.value = profile.firstName
-  lastName.value = profile.lastName
-  phoneNumber.value = profile.phone ? profile.phone : ''
-  address.value = profile.address ? profile.address : ''
+  firstName.value = profile.dbayUser.firstName
+  lastName.value = profile.dbayUser.lastName
+  phoneNumber.value = profile.dbayUser.phone ? profile.dbayUser.phone : ''
+  address.value = profile.dbayUser.address ? profile.dbayUser.address : ''
 }
 
 async function submitForm() {
