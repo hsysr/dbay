@@ -6,7 +6,8 @@
         <a class="navbar-item" href="/">
           <strong>DBay</strong>
         </a>
-        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-base" ref="navbarBurger" @click="onExpandBurger">
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-base"
+          ref="navbarBurger" @click="onExpandBurger">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -24,27 +25,28 @@
           <a v-if="user?.preferred_username" class="navbar-item" id="nav-create-item" href="/items/create-item">
             Create item
           </a>
+          <p v-if="isAdmin" class="navbar-item" id="nav-is-admin">Admin user</p>
         </div>
         <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <a v-if="!(user?.preferred_username)" class="button is-primary" id="nav-login" href="/api/login">
-              <strong>Login</strong>
-            </a>
-            <div v-else>
-              <a class="button is-primary" :href="`/users/${user.preferred_username}/profile`" id="profile-button">
-                <strong>Profile</strong>
+          <div class="navbar-item">
+            <div class="buttons">
+              <a v-if="!(user?.preferred_username)" class="button is-primary" id="nav-login" href="/api/login">
+                <strong>Login</strong>
               </a>
-              <a class="button is-warning" @click="logout" id="logout-button"><strong>Logout</strong></a>
-              <form method="POST" action="/api/logout" id="logoutForm" />
+              <div v-else>
+                <a class="button is-primary" :href="`/users/${user.preferred_username}/profile`" id="profile-button">
+                  <strong>Profile</strong>
+                </a>
+                <a class="button is-warning" @click="logout" id="logout-button"><strong>Logout</strong></a>
+                <form method="POST" action="/api/logout" id="logoutForm" />
 
+              </div>
             </div>
           </div>
         </div>
       </div>
-      </div>
 
-      
+
     </nav>
 
     <router-view />
@@ -83,7 +85,7 @@ onMounted(async () => {
   interface IsAdminResp {
     isAdmin: boolean
   }
-  let res: IsAdminResp = await (await fetch('/api/users/is-admin', {method: 'GET'})).json()
+  let res: IsAdminResp = await (await fetch('/api/users/is-admin', { method: 'GET' })).json()
   console.log('isAdmin')
   console.log(res)
   console.log(user.value.roles)
