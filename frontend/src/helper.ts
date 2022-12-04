@@ -3,6 +3,11 @@ interface SearchResult {
   items: DbayItem[]
 }
 
+export interface ImgRepr {
+  id: string,
+  b64: string
+}
+
 function validateObject(obj: Object, targetLength: number) {
   let keys = Object.keys(obj) as (keyof typeof obj)[]
   if (keys.length != targetLength) {

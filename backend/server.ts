@@ -38,7 +38,7 @@ const upload = multer({ dest: 'images/' })
 
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '10mb'}))
 app.use(bodyParser.urlencoded({ extended: true }))
 
 const logger = pino({

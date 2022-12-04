@@ -43,7 +43,7 @@
       </div>
       <div class="message-body">
         <div class="box">
-          <ImageWithPopup v-for="imgLink, idx in imageLinks" :key="idx" :imageLink="imgLink" :isEdit="true" @delete-img="deleteImage"/>
+          <ImageWithPopup v-for="imgRepr, idx in imgReprs" :key="idx" :imageLink="imgRepr.b64" :imageId="imgRepr.id" :isEdit="true" @delete-img="deleteImage"/>
         </div>
       </div>
     </article>
@@ -94,6 +94,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faDollarSign } from '@fortawesome/free-solid-svg-icons'
 import { router } from '../main'
+import {ImgRepr} from '../helper'
 
 library.add(faDollarSign)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
@@ -137,6 +138,9 @@ const imageLinks = ref([] as string[])
 const createdBy = ref('')
 
 const imageName = ref('')
+const imgReprs = ref([] as ImgRepr[])
+
+
 let imageData: string | undefined = undefined
 const uploaderPrompt = computed(() => {
   if (!imageName.value) {
@@ -179,6 +183,27 @@ async function submitForm() {
   }
 }
 
+async function getImageBase64() {
+  interface ImageStrResp {
+    imgStr: string
+  }
+  // let imageArr = [] as string[]
+  imgReprs.value = []
+
+  for (let link of imageLinks.value) {
+    let res: ImageStrResp = await ( await fetch(link, {method: 'GET'}) ).json()
+    if (!res || !res.imgStr) {
+      return
+    }
+
+    // imageArr.push(res.imgStr)
+    imgReprs.value.push({ id: link, b64: res.imgStr })
+  }
+
+
+  // imageLinks.value = JSON.parse(JSON.stringify(imageArr))
+}
+
 async function refresh() {
 
   let resp: RefreshResp = await (await fetch(`/api/items/${props.itemId}/details`, { method: 'GET' })).json()
@@ -194,7 +219,10 @@ async function refresh() {
   date.value = resp.result.createTime
   isDeleteButtonClicked.value = false
   createdBy.value = resp.result.createdBy
-  imageLinks.value = resp.result.imageLink.map(link => `http://127.0.0.1:8080/${link}`)
+  // imageLinks.value = resp.result.imageLink.map(link => `http://127.0.0.1:8080/${link}`)
+  imageLinks.value = resp.result.imageLink.map(link => `/api/images/${link}`)
+  await getImageBase64()
+
 }
 
 async function onSubmitImage() {
@@ -212,7 +240,10 @@ async function onSubmitImage() {
     imgStr: imageData
   }
 
-  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { method: 'POST', body: JSON.stringify(payload) })).json()
+  console.log('payload is')
+  console.log(JSON.stringify(payload))
+
+  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) })).json()
   if (res && res.status && res.status === 'ok') {
     await refresh()
     imageData = undefined
@@ -232,9 +263,11 @@ async function onSelect() {
     reader.onload = () => {
       imageData = reader.result?.toString()
     }
+    reader.onloadend = () => {
+      imageData = reader.result?.toString()
+    }
     reader.readAsDataURL(f)
-    console.log('image b64 string is')
-    console.log(imageData)
+    
 
     // imageData = f
     imageName.value = f.name
