@@ -140,3 +140,21 @@ export async function searchItem(searchType: "itemName" | "username", keyword: s
   })
   return searchResult
 }
+
+export async function deleteImageLink(itemid: string, link: string) {
+  try {
+    const id = new ObjectId(itemid)
+  }
+  catch {
+    return 0
+  }
+  const result = await items.updateOne(
+    {
+      _id: new ObjectId(itemid)
+    },
+    {
+      $pull: { imageLink: link }
+    }
+  )
+  return result.modifiedCount
+}
