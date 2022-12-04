@@ -146,20 +146,21 @@ export async function searchItem(searchType: "itemName" | "username", keyword: s
   return searchResult
 }
 
-export async function deleteImageLink(itemid: string, link: string) {
+export async function deleteImage(itemid: string, filename: any) {
   try {
     const id = new ObjectId(itemid)
   }
   catch {
     return 0
   }
-  const result = await items.updateOne(
+  await items.updateOne(
     {
       _id: new ObjectId(itemid)
     },
     {
-      $pull: { imageLink: link }
+      $pull: { imageLink: filename }
     }
   )
-  return result.modifiedCount
+  const result = await images.deleteOne({ _id: filename })
+  return result.deletedCount
 }

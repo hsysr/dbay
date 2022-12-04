@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImage, updateUser, searchItem, deleteImageLink } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImage, updateUser, searchItem, deleteImage } from "./data"
 import fs from "fs"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -264,12 +264,11 @@ app.delete("/api/items/:itemid/remove-image/:imagename", checkAuthenticated, asy
     res.status(400).json({ status: "You don't have access to the image" })
     return
   }
-  const deleteResult = await deleteImageLink(req.params.itemid, "api/images/" + req.params.imagename)
+  const deleteResult = await deleteImage(req.params.itemid, req.params.imagename)
   if (deleteResult == 0) {
     res.status(400).json({ status: "Image not found" })
     return
   }
-  fs.unlinkSync(__dirname + "/images/" + req.params.imagename)
   res.status(200).json({ status: "ok" })
 })
 
@@ -312,6 +311,7 @@ client.connect().then(() => {
   customers = db.collection('customers')
   items = db.collection('items')
   admins = db.collection('admins')
+  images = db.collection('images')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/dbay/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
