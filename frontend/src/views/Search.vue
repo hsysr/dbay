@@ -4,7 +4,7 @@
       <div class="field">
         <label class="label">Keyword</label>
         <div class="control">
-          <input v-model="keyword" class="input" type="text" />
+          <input v-model="keyword" class="input" id="search-keyword-field" type="text" />
         </div>
       </div>
 
@@ -25,13 +25,15 @@
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button is-primary" @click.prevent="doSearch">Search</button>
+          <button class="button is-primary" id="search-button" @click.prevent="doSearch">Search</button>
         </div>
       </div>
     </form>
+    <div id="search-results">
+      <ItemList v-if="(items.length > 0)" :itemList="items"></ItemList>
+      <p v-else>No items found</p>
+    </div>
 
-    <ItemList v-if="(items.length > 0)" :itemList="items"></ItemList>
-    <p v-else>No items found</p>
     <!-- <div class="field is-grouped">
       <div class="control">
         <button class="button is-primary" v-if="(offset > 0)" @click="changePage(-1)">Prev</button>

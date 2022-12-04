@@ -2,7 +2,7 @@
   <div class="container">
     <section class="hero is-primary">
       <div class="hero-body">
-        <p class="title has-text-centered">
+        <p class="title has-text-centered" id="banner">
           {{ dbayItem.itemName }}
         </p>
       </div>
@@ -11,8 +11,8 @@
       <div class="message-header">
         <p>Info:</p>
       </div>
-      <router-link :to="{ name: 'userProfile', params: {username: dbayItem.createdBy} }"><p class="is-size-3 2rem has-text-left">Seller: {{ dbayItem.createdBy }}</p></router-link>
-      <p class="has-text-left is-size-3">Price: ${{ dbayItem.price }}</p>
+      <router-link :to="{ name: 'userProfile', params: {username: dbayItem.createdBy} }"><p class="is-size-3 2rem has-text-left" id="item-seller">Seller: {{ dbayItem.createdBy }}</p></router-link>
+      <p class="has-text-left is-size-3" id="item-price">Price: ${{ dbayItem.price }}</p>
 
     </article>
     <article class="message is-link" v-if="dbayItem.imageLink && dbayItem.imageLink.length > 0">
@@ -30,21 +30,11 @@
       <div class="message-header">
         <p>Description:</p>
       </div>
-      <div class="message-body">
+      <div class="message-body" id="item-description">
         {{ dbayItem.description }}
       </div>
     </article>
-
-    <!-- <div v-if="(dbayItem.createdBy === currentUser.preferred_username)" class="card">
-        <header class="card-header">
-          <p class="card-header-title">
-            Actions
-          </p>
-        </header>
-        <footer class="card-footer">
-          <button class="button is-link mt-5 ml-3" :href="`/items/${dbayItem._id}/update`">Update Item</button>
-        </footer>
-    </div> -->
+    
     <div class="field">
       <a :href="`/items/${dbayItem._id}/update`">
         <button class="button is-link mt-5 ml-3" >Update Item</button>
