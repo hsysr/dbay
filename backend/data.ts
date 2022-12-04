@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { customers, items } from './server'
+import { customers, images, items } from './server'
 
 export interface DbayUser {
   userName: string,
@@ -97,18 +97,23 @@ export async function updateItem(dbayItem: Omit<DbayItem, 'imageLink' | "createT
   return result.matchedCount
 }
 
-export async function addImageLink(itemId: string, filename: string) {
-  const result = await items.updateOne(
+export async function addImage(itemId: string, fileName: any, fileContent: string) {
+  await items.updateOne(
     {
       _id: new ObjectId(itemId)
     },
     {
       $push: {
-        imageLink: "api/images/" + filename
+        imageLink: fileName
       }
     }
   )
-  return result.matchedCount
+  await images.insertOne(
+    {
+      _id: fileName,
+      content: fileContent
+    }
+  )
 }
 
 export async function searchItem(searchType: "itemName" | "username", keyword: string, sortBy: 'createTime' | 'priceHighToLow' | 'priceLowToHigh') {

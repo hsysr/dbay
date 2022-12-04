@@ -8,7 +8,7 @@ import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
 import passport from 'passport'
 import { keycloak } from "./secrets"
-import { getUser, createItem, deleteItem, updateItem, getItem, addImageLink, updateUser, searchItem, deleteImageLink } from "./data"
+import { getUser, createItem, deleteItem, updateItem, getItem, addImage, updateUser, searchItem, deleteImageLink } from "./data"
 import fs from "fs"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -20,6 +20,7 @@ let db: Db
 export let customers: Collection
 export let items: Collection
 let admins: Collection
+export let images: Collection
 
 const multer  = require('multer')
 const upload = multer({ dest: 'images/' })
@@ -233,27 +234,22 @@ app.delete("/api/items/:itemid/remove-item", checkAuthenticated, async (req, res
   }
 })
 
-app.post("/api/items/:itemid/upload-image", checkAuthenticated, upload.single('file'), async (req, res) => {
+app.post("/api/items/:itemid/upload-image", checkAuthenticated, async (req, res) => {
+  if (typeof req.body.imgStr !== "string") {
+    res.status(400).json({ status: "payload error" })
+    return
+  }
   const item = await getItem(req.params.itemid)
   if (item === undefined) {
     res.status(400).json({ status: "Cannot find item with given id" })
-    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
   if (item.createdBy != (req.user as any).preferred_username) {
     res.status(400).json({ status: "User name does not match" })
-    fs.unlinkSync(__dirname + "/images/" + (req as any).file.filename)
     return
   }
 
-
-  const imageType = (req as any).file.originalname.split(".").pop()
-  const newFileName = uuidv4() + "." + imageType
-  await new Promise((resolve, reject) => {
-    fs.rename(__dirname + "/images/" + (req as any).file.filename, __dirname + "/images/" + newFileName, resolve)
-  })
-
-  await addImageLink(item._id, newFileName)
+  await addImage(req.params.itemid, uuidv4(), req.body.imgStr)
 
   res.status(200).json({ status: "ok" })
 })
