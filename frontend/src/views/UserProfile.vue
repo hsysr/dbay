@@ -2,7 +2,7 @@
   <div class="container">
     <section class="hero is-primary">
       <div class="hero-body">
-        <p class="title has-text-centered">
+        <p class="title has-text-centered" id="banner">
           {{ dbayUser?.firstName }} {{ dbayUser?.lastName }} ({{ dbayUser?.userName }})
         </p>
       </div>
@@ -15,15 +15,14 @@
       </header>
       <div class="card-content">
         <div class="content">
-          <p class="has-text-left" v-if="dbayUser?.email">Email address: {{ dbayUser?.email }}</p>
-          <p class="has-text-left" v-if="dbayUser?.phone">Phone number: {{ dbayUser?.phone }}</p>
-          <p class="has-text-left" v-if="dbayUser?.address">Address: {{ dbayUser?.address }}</p>
+          <p class="has-text-left" id="user-email" v-if="dbayUser?.email">Email address: {{ dbayUser?.email }}</p>
+          <p class="has-text-left" id="user-phone" v-if="dbayUser?.phone">Phone number: {{ dbayUser?.phone }}</p>
+          <p class="has-text-left" id="user-address" v-if="dbayUser?.address">Address: {{ dbayUser?.address }}</p>
         </div>
       </div>
       <footer class="card-footer">
-        <!-- <a :href="`/search/${dbayUser?.userName}/itemName/createTime`" class="card-footer-item">All items on sale</a> -->
-        <a :href="`/users/${currentUser.preferred_username}/profile/update`" class="card-footer-item" v-if="dbayUser?.userName === currentUser.preferred_username">Edit profile</a>
-        <router-link class="card-footer-item" :to="{ name: 'searchWithParams', params: { keyword: currentUser.preferred_username, searchType: 'username', filterType: 'createTime'} }" >All items on sale</router-link>
+        <a :href="`/users/${currentUser.preferred_username}/profile/update`" class="card-footer-item" id="update-profile" v-if="dbayUser?.userName === currentUser.preferred_username">Edit profile</a>
+        <router-link class="card-footer-item" id="user-items" :to="{ name: 'searchWithParams', params: { keyword: currentUser.preferred_username, searchType: 'username', filterType: 'createTime'} }" >All items on sale</router-link>
       </footer>
     </div>
   </div>
@@ -61,7 +60,6 @@ async function getUserProfile() {
 
   if (!dbayUser.value) {
     console.log('User not found')
-    // TODO: redirect to 404 page
   }
 }
 

@@ -133,3 +133,5 @@ dist
 .dummy/
 .idea/
 backend/images/
+
+playwright-report/

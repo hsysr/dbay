@@ -4,7 +4,7 @@
       <div class="media">
         <div class="media-left">
           <figure class="image is-128x128 mr-5" v-if="(props.dbayItem.imageLink.length > 0)">
-            <img :src="props.dbayItem.imageLink[0]" alt="item image" />
+            <img :src="`/api/images/${props.dbayItem.imageLink[0]}`" alt="item image" />
           </figure>
         </div>
         <div class="tile is-ancestor">
@@ -21,8 +21,6 @@
           </div>
         </div>
       </div>
-
-
 
     </div>
     <div class="card-footer">

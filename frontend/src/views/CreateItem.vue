@@ -4,14 +4,14 @@
       <div class="field">
         <label class="label">Item name</label>
         <div class="control">
-          <input v-model="itemName" class="input" type="text" placeholder="Please enter the name for your item" />
+          <input v-model="itemName" class="input" id="itemname-field" type="text" placeholder="Please enter the name for your item" />
         </div>
       </div>
 
       <div class="field">
         <label class="label">Price</label>
-        <div class="control has-icon-left">
-          <input v-model.number="price" class="input" type="number" placeholder="0" />
+        <div class="control has-icons-left">
+          <input v-model.number="price" class="input" id="price-field" type="number" placeholder="0" />
           <span class="icon is-small is-left">
             <FontAwesomeIcon icon="fa-solid fa-dollar-sign" />
           </span>
@@ -24,17 +24,16 @@
       <div class="field">
         <label class="label">Description</label>
         <div class="control">
-          <textarea v-model="description" class="textarea"
+          <textarea v-model="description" class="textarea" id="description-field"
             placeholder="Please enter additional description for the item" />
         </div>
       </div>
 
       <div class="field is-grouped">
         <div class="control">
-          <button class="button is-primary" @click.prevent="submitForm">Submit</button>
+          <button class="button is-primary" id="submit-button" @click.prevent="submitForm">Submit</button>
         </div>
       </div>
-
     </form>
   </div>
 </template>
