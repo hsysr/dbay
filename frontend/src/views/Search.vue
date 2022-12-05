@@ -34,12 +34,6 @@
       <p v-else>No items found</p>
     </div>
 
-    <!-- <div class="field is-grouped">
-      <div class="control">
-        <button class="button is-primary" v-if="(offset > 0)" @click="changePage(-1)">Prev</button>
-        <button class="button is-link" v-if="(items.length == 10)" @click="changePage(1)">Next</button>
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -94,15 +88,6 @@ async function doSearch() {
   console.log(items.value)
 }
 
-// async function changePage(next: number) {
-//   let newOffset = offset.value + next
-//   if (newOffset < 0) {
-//     console.log(`Search->changePage: invalid page number ${newOffset}`)
-//   }
-
-//   offset.value = newOffset
-//   await doSearch()
-// }
 
 onMounted(doSearch)
 

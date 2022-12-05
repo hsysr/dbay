@@ -94,7 +94,6 @@ onMounted(async () => {
 
 async function logout() {
   ; (window.document.getElementById('logoutForm') as HTMLFormElement).submit()
-  // await fetch('/api/logout', { method: 'POST' })
 
 }
 </script>

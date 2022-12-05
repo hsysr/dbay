@@ -4,16 +4,16 @@
       <div class="field">
         <label class="label">Item name</label>
         <div class="control">
-          <input v-model="itemName" class="input" type="text" placeholder="Please enter the name for your item" />
+          <input v-model="itemName" class="input" type="text" placeholder="Please enter the name for your item"/>
         </div>
       </div>
 
       <div class="field">
         <label class="label">Price</label>
         <div class="control has-icon-left">
-          <input v-model.number="price" class="input" type="number" :number="true" placeholder="0" />
+          <input v-model.number="price" class="input" type="number" :number="true" placeholder="0"/>
           <span class="icon is-small is-left">
-            <FontAwesomeIcon icon="fa-solid fa-dollar-sign" />
+            <FontAwesomeIcon icon="fa-solid fa-dollar-sign"/>
           </span>
         </div>
         <p class="help">
@@ -25,7 +25,7 @@
         <label class="label">Description</label>
         <div class="control">
           <textarea v-model="description" class="textarea"
-            placeholder="Please enter additional description for the item" />
+                    placeholder="Please enter additional description for the item"/>
         </div>
       </div>
 
@@ -43,7 +43,8 @@
       </div>
       <div class="message-body">
         <div class="box">
-          <ImageWithPopup v-for="imgRepr, idx in imgReprs" :key="idx" :imageLink="imgRepr.b64" :imageId="imgRepr.id" :isEdit="true" @delete-img="deleteImage"/>
+          <ImageWithPopup v-for="(imgRepr, idx) in imgReprs" :key="idx" :imageLink="imgRepr.b64" :imageId="imgRepr.id"
+                          :isEdit="true" @delete-img="deleteImage"/>
         </div>
       </div>
     </article>
@@ -51,9 +52,10 @@
     <!-- Upload image -->
     <form @submit.prevent="onSubmitImage" enctype="multipart/form-data">
       <div class="field">
-        <div class="file is-centered is-boxed is-success has-name">
-          <input @change="onSelect" class="file-input" type="file" ref="fileUploadField" />
-          <span class="file-cta">
+        <label class="file-label">
+          <div class="file is-boxed is-success has-name">
+            <input @change="onSelect" class="file-input" type="file" ref="fileUploadField"/>
+            <span class="file-cta">
             <span class="file-icon">
               <i class="fas fa-upload"></i>
             </span>
@@ -61,7 +63,9 @@
               {{ uploaderPrompt }}
             </span>
           </span>
-        </div>
+          </div>
+        </label>
+
       </div>
       <div class="field is-grouped">
         <div class="control">
@@ -86,14 +90,14 @@
 </template>
 
 <script setup lang="ts">
-import Vue, { computed, inject, onMounted } from 'vue'
-import { ref, Ref } from 'vue'
-import { DbayItem, DbayUser } from '../../../backend/data'
+import Vue, {computed, inject, onMounted} from 'vue'
+import {ref, Ref} from 'vue'
+import {DbayItem, DbayUser} from '../../../backend/data'
 import ImageWithPopup from '../components/ImageWithPopup.vue'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faDollarSign } from '@fortawesome/free-solid-svg-icons'
-import { router } from '../main'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import {faDollarSign} from '@fortawesome/free-solid-svg-icons'
+import {router} from '../main'
 import {ImgRepr} from '../helper'
 
 library.add(faDollarSign)
@@ -163,11 +167,11 @@ async function submitForm() {
   }
 
   let res = await (await fetch(
-    '/api/items/update-item',
-    {
-      headers: { 'Content-Type': 'application/json' },
-      method: 'PUT', body: JSON.stringify(payload)
-    })
+          '/api/items/update-item',
+          {
+            headers: {'Content-Type': 'application/json'},
+            method: 'PUT', body: JSON.stringify(payload)
+          })
   ).json() as Resp
 
   console.log(`UpdateItem->submitForm: response from remote is`)
@@ -187,17 +191,18 @@ async function getImageBase64() {
   interface ImageStrResp {
     imgStr: string
   }
+
   // let imageArr = [] as string[]
   imgReprs.value = []
 
   for (let link of imageLinks.value) {
-    let res: ImageStrResp = await ( await fetch(link, {method: 'GET'}) ).json()
+    let res: ImageStrResp = await (await fetch(link, {method: 'GET'})).json()
     if (!res || !res.imgStr) {
       return
     }
 
     // imageArr.push(res.imgStr)
-    imgReprs.value.push({ id: link, b64: res.imgStr })
+    imgReprs.value.push({id: link, b64: res.imgStr})
   }
 
 
@@ -206,7 +211,7 @@ async function getImageBase64() {
 
 async function refresh() {
 
-  let resp: RefreshResp = await (await fetch(`/api/items/${props.itemId}/details`, { method: 'GET' })).json()
+  let resp: RefreshResp = await (await fetch(`/api/items/${props.itemId}/details`, {method: 'GET'})).json()
   if (!resp || !resp.result) {
     console.log('UpdateItem->refresh: failed to load item details')
     // TODO: redirect to 404 page
@@ -243,7 +248,11 @@ async function onSubmitImage() {
   console.log('payload is')
   console.log(JSON.stringify(payload))
 
-  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) })).json()
+  let res: SubmitImageResp = await (await fetch(`/api/items/${props.itemId}/upload-image`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  })).json()
   if (res && res.status && res.status === 'ok') {
     await refresh()
     imageData = undefined
@@ -267,7 +276,7 @@ async function onSelect() {
       imageData = reader.result?.toString()
     }
     reader.readAsDataURL(f)
-    
+
 
     // imageData = f
     imageName.value = f.name
@@ -277,13 +286,13 @@ async function onSelect() {
 }
 
 async function deleteItem() {
-  let res: DeleteResp = await (await fetch(`/api/items/${props.itemId}/remove-item`, { method: 'DELETE' })).json()
+  let res: DeleteResp = await (await fetch(`/api/items/${props.itemId}/remove-item`, {method: 'DELETE'})).json()
   if (!res || !res.status || res.status !== 'ok') {
     console.log(`UpdateItem->deleteItem: failed to delete item`)
     console.log(res)
     return
   }
-  router.push( { path: '/' } )
+  router.push({path: '/'})
 }
 
 async function onClickDeleteButton() {
@@ -305,8 +314,9 @@ async function deleteImage(imgLink: string) {
   interface DeleteImageResp {
     status: string
   }
+
   console.log(`Trying to delete ${imgLink}`)
-  let res: DeleteImageResp = await ( await fetch(`/api/items/${props.itemId}/remove-image/${imgLink}`, { method: 'DELETE' }) ).json()
+  let res: DeleteImageResp = await (await fetch(`/api/items/${props.itemId}/remove-image/${imgLink}`, {method: 'DELETE'})).json()
   if (!res || !res.status || res.status !== 'ok') {
     console.log(`UpdateItem->deleteImage: failed to delete image ${imgLink}`)
     console.log(res)

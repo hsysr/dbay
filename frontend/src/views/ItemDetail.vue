@@ -74,7 +74,7 @@ async function getImageBase64() {
   interface ImageStrResp {
     imgStr: string
   }
-  // let imageArr = [] as string[]
+
   imgReprs.value = []
 
   for (let link of dbayItem.value.imageLink) {
@@ -82,18 +82,16 @@ async function getImageBase64() {
     if (!res || !res.imgStr) {
       return
     }
-    // imageArr.push(res.imgStr)
+
     imgReprs.value.push({ id:link, b64: res.imgStr })
   }
 
-  // dbayItem.value.imageLink = JSON.parse(JSON.stringify(imageArr))
 }
 
 async function getItemDetails() {
 
   let item: ItemDetailsResp = await (await fetch(`/api/items/${props.itemId}/details`, { method:'GET' })).json()
 
-  // let item = dbayItems.find(dItem => dItem._id === props.itemId)
   if (!item || !item.result) {
     console.log(`ItemDetail->getItemDetails: Invalid item id number ${item}`)
     return
@@ -105,7 +103,6 @@ async function getItemDetails() {
   console.log(dbayItem.value)
 
   // add a slash in front of each img link
-  // dbayItem.value.imageLink = dbayItem.value.imageLink.map(link => `http://127.0.0.1:8080/${link}`)
   dbayItem.value.imageLink = dbayItem.value.imageLink.map(link => `/api/images/${link}`)
   await getImageBase64()
   console.log(dbayItem.value.imageLink)
